@@ -1,1 +1,147 @@
-# Paid-Trial-Task-Glass-Drawing-to-LPO-Demo
+# Glass Drawing → LPO (demo)
+
+A phone photo of a glass drawing goes in, and a **clean, checkable LPO draft** comes out: an Excel file ready for ERP upload and a one-page PDF.
+
+The system never guesses silently. Any value it cannot read clearly is shown as **`CHECK`**, and every flagged item appears in a "Needs human check" box.
+
+```
+photo.jpg ─► enhance (OpenCV) ─► extract (Gemini vision → JSON) ─► validate (rules, CHECK, confidence) ─► Excel + PDF
+```
+
+---
+
+## Setup (about 5 minutes)
+
+You need Python 3.10 or newer and a free Gemini API key from <https://aistudio.google.com/apikey>.
+
+```bash
+git clone git@github.com:prey801/Paid-Trial-Task-Glass-Drawing-to-LPO-Demo.git
+cd Paid-Trial-Task-Glass-Drawing-to-LPO-Demo
+python3 -m venv .venv
+.venv/bin/pip install -e ".[dev]"          # or: uv venv && uv pip install -e ".[dev]"
+cp .env.example .env                         # then paste your key into GEMINI_API_KEY
+```
+
+Check the install. The tests run offline and need no API key:
+
+```bash
+.venv/bin/python -m pytest -q
+```
+
+## Run it
+
+**Command line**
+
+```bash
+.venv/bin/glass-lpo run samples/originals/hard.jpg
+# optional: score against a ground-truth file
+.venv/bin/glass-lpo run samples/originals/hard.jpg --truth samples/ground_truth/hard.json
+```
+
+**Web page** (upload a photo, see the before/after images, panels and flags, then download the Excel and PDF):
+
+```bash
+.venv/bin/streamlit run app.py
+```
+
+Each run writes to `outputs/<LPO number>/`:
+
+| File | What it is |
+|---|---|
+| `original.jpg`, `enhanced.png` | The photo before and after enhancement |
+| `LPO-YYYYMMDD-NNN.xlsx` | One row per panel with the 17 ERP columns, plus a **Flags** sheet |
+| `LPO-YYYYMMDD-NNN.pdf` | One-page LPO draft: line items, total m², total holes, **Needs human check** box |
+| `LPO-YYYYMMDD-NNN.json` | Everything that was extracted, with each value's clear/unclear status |
+
+The LPO number is allocated only after a successful extraction, so a failed run does not use up a number.
+
+## How it works
+
+| Stage | File | What it does |
+|---|---|---|
+| Enhance | `glass_lpo/enhance.py` | Finds the paper sheet and corrects perspective, or deskews small rotations if no sheet is found. Then denoises, flattens uneven lighting (background division), applies CLAHE contrast, upscales and sharpens. Each step is logged and skipped if it fails. |
+| Extract | `glass_lpo/extract.py` | Sends **both the original and the enhanced photo** to Gemini with a glass-industry prompt and a strict JSON schema. For every number, the model returns the text as written, any other possible readings, and whether it is clear, unclear or not shown. |
+| Validate | `glass_lpo/validate.py` | Turns unclear values into `CHECK` and applies the business rules (below). Sets each panel's confidence to High, Medium or Low. |
+| Export | `glass_lpo/export_excel.py`, `glass_lpo/export_pdf.py` | Writes the Excel file and the one-page PDF. |
+| Score | `glass_lpo/evaluate.py` | Compares a run with hand-written ground truth. A confidently wrong value is counted separately from an honest `CHECK`. |
+| Data model | `glass_lpo/schema.py` | Every value is stored with its *value*, whether it was read *clearly*, and whether it was *shown* on the drawing. |
+
+### When a value becomes CHECK
+- The model marks it unclear, or offers any other possible reading (e.g. a "150" that could be "160").
+- The original and enhanced images disagree.
+- The value was inferred rather than written. For example, a stacked panel's width taken from the overall width is shown as `900 (CHECK)` with a note explaining where it came from.
+
+### Validation rules
+- Panel widths or heights must add up to the overall size (side-by-side and stacked layouts are both detected). The tolerance is ±5 mm or 1%.
+- Width and height must be 50–6000 mm, with a warning above the 3210 mm jumbo-sheet limit.
+- Thickness must be a standard size: 3, 4, 5, 6, 8, 10, 12, 15, 19 or 25 mm.
+- Hole diameter must be 4–100 mm and at least the glass thickness, which is required for toughened glass.
+- Holes and notches must lie inside the panel, and a notch must have a size.
+- **Units** (`glass_lpo/units.py`):
+  - **No unit written:** assumed to be **cm** (local drawings write "90 × 210" for a 900 × 2100 mm door) and converted to mm.
+  - **Safety rule:** if converting would push sizes past the 6000 mm sheet limit while the numbers as written are sensible mm (e.g. "900 × 2100"), they are kept as mm instead.
+  - **cm or m written:** converted to mm.
+  - **Inches or an unknown unit:** not converted, and every size is marked `CHECK`.
+  - **Thickness:** always treated as mm.
+  - Any assumption about units is flagged.
+- Glass type must be a recognised type, so a drawing title is not mistaken for one.
+- Unwritten quantities are assumed to be 1, and that assumption is flagged.
+- Panel IDs must not repeat, and the drawing must contain at least one panel.
+
+### Confidence
+- **High:** nothing to check.
+- **Medium:** only minor warnings, e.g. thickness not stated, quantity assumed to be 1, or hole positions not dimensioned.
+- **Low:** at least one `CHECK` value or a broken rule.
+
+Any panel below High has **Needs check = Y**.
+
+## Model and cost
+
+- **Model:** Google Gemini Flash through the `google-genai` SDK. `GEMINI_MODEL` in `.env` is a comma-separated fallback list:
+  `gemini-3.5-flash,gemini-3.8-flash,gemini-3.7-flash,gemini-3.5-flash-lite`.
+  If a model is busy (503) it is retried once and the next model is tried. If it is out of quota (429), the next model is tried straight away. The whole extraction gives up after about 150 s, and the model that was used is printed on the LPO.
+- **Tokens per drawing:** about 3.3k input (two images and the prompt), about 1.3k output and about 3.5k "thinking". That is one call per drawing, taking 30–50 s.
+- **Cost per drawing:** **KES 0** on Gemini's free tier, which is enough for this demo. On paid Flash pricing it is roughly **KES 1.5–3 per drawing** (about USD 0.01–0.02 at KES 129 = USD 1). Thinking tokens make up most of that. <!-- TODO: confirm against the current Gemini price sheet -->
+- **Other tools:** OpenCV, NumPy, Pydantic, openpyxl, ReportLab, Streamlit and pytest.
+
+## Reading the outputs
+
+- **Amber cells** in the Excel and the PDF are `CHECK` values. Never cut from them without confirming.
+- **Flags sheet** (Excel) and **Needs human check** box (PDF) list every flagged item, plus the drawing-level notes.
+- **Hole count** in the Excel is *per piece*. **Area** is the *line total* (W × H × Qty). The PDF's total holes takes quantity into account.
+- Resolve rows with **Needs check = Y** before importing into the ERP. Numeric columns contain the text `CHECK` until then.
+
+## Test drawings and results
+
+| Drawing | Photo | Enhanced | Ground truth | Outputs |
+|---|---|---|---|---|
+| Simple: one panel, two holes | `samples/originals/simple.jpg` | `samples/enhanced/simple.png` | `samples/ground_truth/simple.json` | `samples/outputs/simple.*` |
+| Realistic: door, 5–6 panels, notch, 25 mm holes | `samples/originals/realistic.jpg` | … | … | … |
+| Hard: messy, at an angle, poor light | `samples/originals/hard.jpg` | … | … | … |
+
+<!-- TODO: fill in accuracy once the real phone photos are run -->
+
+`samples/synthetic/` also contains three computer-generated drawings, made by `scripts/make_synthetic.py`, with exact ground truth. They are used as a repeatable regression set.
+
+## Known limitations
+
+- **Real photos:** tested on synthetic drawings and a handful of phone photos only. Real fabricator handwriting will throw up cases these didn't cover.
+- **Self-reported confidence:** the model's own "clear" label is not fully reliable. On a distorted synthetic drawing it once read "150" as "160" with confidence. Sending both images and asking for alternative readings fixed that case, but a confidently wrong reading is still possible. Hence the human check before cutting.
+- **Rectangles only:** panels are assumed to be rectangles. Rakes, arches and L-shapes appear only as notes or features, and their area is the bounding rectangle.
+- **One assembly per photo:** each photo is treated as one drawing with one overall size. Several separate drawings on one page will raise "sizes don't add up" flags.
+- **Unit guess:** a drawing with no unit is assumed to be cm, with a size-based safety rule for mm. A small drawing in mm could still be read as cm (e.g. a 400 × 300 mirror would become 4000 × 3000 mm). It is always flagged, but confirm the unit on every unlabelled drawing.
+- **No pricing:** pricing is out of scope.
+- **Single user:** the LPO counter is a local file and is not safe for several people running the system at once.
+- **Free-tier variability:** the newest Flash models are often busy or rate-limited on the free tier, so the fallback list matters.
+
+## Project layout
+
+```
+glass_lpo/      pipeline code (see "How it works")
+app.py          Streamlit web page
+scripts/        synthetic test-drawing generator
+samples/        test photos, enhanced images, ground truth, outputs
+tests/          offline pytest suite (no API key needed)
+```
+
+API keys live only in `.env`, which git ignores.

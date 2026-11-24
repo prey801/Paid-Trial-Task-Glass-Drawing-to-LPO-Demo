@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+outputs/runs/
+.pytest_cache/
+# Confidential client brief - do not commit
+Paid Trial Task*.pdf
+*.egg-info/
+.vscode/
+.idea/
+# Run outputs (deliverables are copied into samples/)
+/outputs/

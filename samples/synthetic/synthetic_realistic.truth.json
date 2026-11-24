@@ -1,0 +1,80 @@
+{
+  "overall_width_mm": 900,
+  "overall_height_mm": 2100,
+  "panels": [
+    {
+      "panel_id": "P1",
+      "width_mm": 900,
+      "height_mm": 400,
+      "quantity": 1,
+      "thickness_mm": null,
+      "glass_type": null,
+      "hole_count": 2,
+      "hole_diameters_mm": [
+        25,
+        25
+      ],
+      "notches_offcuts": 0,
+      "notch_sizes": []
+    },
+    {
+      "panel_id": "P2",
+      "width_mm": 900,
+      "height_mm": 450,
+      "quantity": 1,
+      "thickness_mm": null,
+      "glass_type": null,
+      "hole_count": 0,
+      "hole_diameters_mm": [],
+      "notches_offcuts": 0,
+      "notch_sizes": []
+    },
+    {
+      "panel_id": "P3",
+      "width_mm": 900,
+      "height_mm": 350,
+      "quantity": 1,
+      "thickness_mm": null,
+      "glass_type": null,
+      "hole_count": 3,
+      "hole_diameters_mm": [
+        25,
+        25,
+        25
+      ],
+      "notches_offcuts": 0,
+      "notch_sizes": []
+    },
+    {
+      "panel_id": "P4",
+      "width_mm": 900,
+      "height_mm": 500,
+      "quantity": 1,
+      "thickness_mm": null,
+      "glass_type": null,
+      "hole_count": 1,
+      "hole_diameters_mm": [
+        25
+      ],
+      "notches_offcuts": 0,
+      "notch_sizes": []
+    },
+    {
+      "panel_id": "P5",
+      "width_mm": 900,
+      "height_mm": 400,
+      "quantity": 1,
+      "thickness_mm": null,
+      "glass_type": null,
+      "hole_count": 2,
+      "hole_diameters_mm": [
+        25,
+        25
+      ],
+      "notches_offcuts": 1,
+      "notch_sizes": [
+        "150x100"
+      ]
+    }
+  ]
+}
