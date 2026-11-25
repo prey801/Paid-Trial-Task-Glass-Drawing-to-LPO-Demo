@@ -130,3 +130,12 @@ def test_panels_matched_by_size_before_id(tmp_path):
     s = score(Drawing(panels=[gpanel("P1", w=None, h=None), gpanel("P2", w=750, h=970)]), t)
     assert not any("P3 width" in d or "P3 height" in d for d in s.details)
     assert any("MISSING panel P2" in d for d in s.details)
+
+
+def test_glass_type_scored_by_meaning(tmp_path):
+    t = truth_file(tmp_path, [tpanel(glass_type="14mm unit (double glazed)")])
+    s = score(Drawing(panels=[gpanel(glass_type=F("UNIT"))]), t)
+    assert s.wrong_confident == 0
+    t = truth_file(tmp_path, [tpanel(glass_type="clear toughened")])
+    s = score(Drawing(panels=[gpanel(glass_type=F("frosted toughened"))]), t)
+    assert s.wrong_confident == 1

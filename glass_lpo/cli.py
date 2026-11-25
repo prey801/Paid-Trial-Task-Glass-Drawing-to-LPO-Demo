@@ -55,6 +55,8 @@ def main(argv: list[str] | None = None) -> int:
     src.add_argument("--from-enhanced", action="store_true",
                      help="send only the enhanced image to the model")
     r.add_argument("--truth", help="ground-truth JSON to score this run against")
+    r.add_argument("--second-read", action="store_true",
+                   help="read the photo twice and mark values the reads disagree on as CHECK")
 
     e = sub.add_parser("enhance", help="enhancement only")
     e.add_argument("image")
@@ -69,6 +71,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     from .pipeline import run
+    if args.second_read:
+        import os
+        os.environ["GLASS_LPO_SECOND_READ"] = "1"
     try:
         extract_from = "original" if args.from_original else "enhanced" if args.from_enhanced else "both"
         res = run(args.image, args.out, extract_from=extract_from)

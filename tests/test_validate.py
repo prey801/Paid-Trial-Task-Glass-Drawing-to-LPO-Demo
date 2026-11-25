@@ -1,3 +1,4 @@
+import pytest
 from glass_lpo.export_excel import fmt_num, review_items
 from glass_lpo.schema import LPO, Confidence, Drawing, Feature, Field, Hole, Panel
 from glass_lpo.validate import _n, parse_offsets, parse_size, validate
@@ -174,8 +175,10 @@ def test_units_not_mm_hard_and_all_low():
 
 def test_glass_type_vocabulary():
     p = panel()
-    p.glass_type = F("HARD - GLASS SHOWER SCREEN DRAWING")
-    assert not has(validate(Drawing(panels=[p])).panels[0].flags, "not recognised")  # has "glass"
+    p.glass_type = F("HARD - GLASS SHOWER SCREEN DRAWING")   # a title, not a type: dropped
+    d = validate(Drawing(panels=[p]))
+    assert not has(d.panels[0].flags, "not recognised") and d.panels[0].glass_type.value is None
+    assert "not a glass type" in d.panels[0].notes
     p.glass_type = F("KITCHEN SPLASHBACK")
     d = validate(Drawing(panels=[p]))
     assert has(d.panels[0].flags, "glass type 'KITCHEN SPLASHBACK' not recognised - confirm")
@@ -183,6 +186,31 @@ def test_glass_type_vocabulary():
     for ok in ("10mm Clear Toughened", "frosted", "Low-E laminated", "bronze tinted", "mirror"):
         p.glass_type = F(ok)
         assert validate(Drawing(panels=[p])).panels[0].flags == [], ok
+
+
+@pytest.mark.parametrize("written,canon", [
+    ("10mm Clear Toughened", "clear toughened"), ("clear tempered", "clear toughened"),
+    ("14mm UNIT", "double glazed unit"), ("DGU", "double glazed unit"), ("IGU", "double glazed unit"),
+    ("14mm unit (double glazed)", "double glazed unit"), ("bronze tinted", "tinted bronze"),
+    ("sandblasted", "frosted"), ("6.38 laminated clear", "clear laminated"),
+    ("Low-E toughened DGU", "low-e toughened double glazed unit"),
+])
+def test_glass_type_mapped_to_fixed_words(written, canon):
+    p = panel()
+    p.glass_type = F(written)
+    d = validate(Drawing(panels=[p]))
+    assert d.panels[0].glass_type.value == canon
+    assert d.panels[0].flags == []
+    assert validate(d).panels[0].notes.count("glass type written") == (written != canon)  # idempotent
+
+
+@pytest.mark.parametrize("generic", ["glass", "Glass", "glazing", "GLASS ORDER"])
+def test_word_glass_alone_is_not_a_type(generic):
+    p = panel()
+    p.glass_type = F(generic)
+    d = validate(Drawing(panels=[p]))
+    assert d.panels[0].glass_type.value is None and not d.panels[0].glass_type.shown
+    assert d.panels[0].flags == []
 
 
 def test_medium_panel_always_needs_check():

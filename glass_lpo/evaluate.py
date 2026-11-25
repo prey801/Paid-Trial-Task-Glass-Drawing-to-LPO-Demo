@@ -22,6 +22,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
+from .glass_types import canonical_glass_type
 from .schema import Drawing, Field, Panel
 
 TOL_MM = 2.0
@@ -90,6 +91,15 @@ def _pos_eq(a, b) -> bool:
 
 def _text_eq(a, b) -> bool:
     return (a or "").strip().lower() == (b or "").strip().lower()
+
+
+def _glass_eq(a, b) -> bool:
+    """Same glass, different words: '14mm unit (double glazed)' == 'UNIT'.
+    Both sides go through the same fixed vocabulary the LPO uses."""
+    ca, cb = canonical_glass_type(a), canonical_glass_type(b)
+    if ca is not None and cb is not None:
+        return ca == cb
+    return _text_eq(a, b)
 
 
 def _simple(s: Score, label: str, got, truth) -> None:
@@ -204,7 +214,7 @@ def score(drawing: Drawing, truth_path: Path | str) -> Score:
         if (tq is not None and tq != 1) or p.quantity.shown:
             _check(s, f"{pid} qty", p.quantity, tq, eq=lambda a, b: a == b)
         _check(s, f"{pid} thickness", p.thickness_mm, tp.get("thickness_mm"))
-        _check(s, f"{pid} glass type", p.glass_type, tp.get("glass_type"), eq=_text_eq)
+        _check(s, f"{pid} glass type", p.glass_type, tp.get("glass_type"), eq=_glass_eq)
         _simple(s, f"{pid} hole count", len(p.holes), tp.get("hole_count", 0))
         want_d = tp.get("hole_diameters_mm", [])
         if want_d or p.holes:

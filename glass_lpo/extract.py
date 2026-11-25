@@ -159,6 +159,23 @@ GLASS DRAWING CONVENTIONS
   to "overall_dimension", "inferred" or "not_shown".
 - Overall width/height: a dimension line spanning the whole assembly. Report
   it in overall_width_mm / overall_height_mm.
+- Reading dimensions on hand sketches: a dimension may be a line with arrows
+  or ticks, or just a number written beside an edge. A number written along
+  the LEFT or RIGHT side of the whole outline is a HEIGHT; along the TOP or
+  BOTTOM it is a WIDTH. Side dimensions are often written vertically or
+  rotated, and arrows may be missing - read them anyway. Check every side of
+  every outline for a number before deciding a size is "not_shown".
+- Several separate items on one sheet (e.g. windows and a door drawn side by
+  side): list the glass panels of every item, and say in each panel's notes
+  which item it belongs to. Report overall_width_mm / overall_height_mm for
+  ONE item only (never mix one item's width with another's height), and
+  write each other item's overall size in general_notes.
+- A number written in a circle, or "(2)", beside an item or its name (e.g.
+  "Windows (2)") is the quantity of that item: it applies to each glass
+  panel of that item.
+- Words written inside an area that name what fills it ("glass", "alumin",
+  "panel", "wood") tell you whether the area is glass. Only glass areas are
+  panels. The word "glass" alone is not a glass_type.
 - "Ø", "dia", "D" before/after a number means a hole DIAMETER.
 - A thickness like "12mm", "10mm", "6mm" written next to glass words is the
   GLASS THICKNESS, not a panel dimension.
@@ -698,8 +715,13 @@ def extract_drawing(
     model: str | None = None,
     api_key: str | None = None,
     client=None,
+    second_read: bool | None = None,
 ) -> Drawing:
     """Read the drawing with Gemini and return an unvalidated Drawing.
+
+    second_read: read the photo a second time (original only) and mark every
+      value the two reads disagree on as CHECK - see `cross_check`. Default
+      from GLASS_LPO_SECOND_READ (off). Doubles the API calls.
 
     image_path: the enhanced image (or the only image).
     original_path: the original photo; if given, both images go in ONE call
@@ -752,6 +774,29 @@ def extract_drawing(
     else:
         contents = [_image_part(enhanced), PROMPT]
 
+    drawing = _read_with_fallback(client, models, contents, deadline_s, call_timeout_s)
+
+    if second_read is None:
+        second_read = (os.getenv("GLASS_LPO_SECOND_READ") or "").strip().lower() in ("1", "true", "yes", "on")
+    if second_read:
+        # A second, independent read of the ORIGINAL photo only (a different
+        # input, so it does not just repeat the first answer).
+        print("[extract] second read (original photo only) to cross-check", flush=True)
+        try:
+            other = _read_with_fallback(client, models, [_image_part(original or enhanced), PROMPT],
+                                        deadline_s, call_timeout_s)
+        except ExtractionError as exc:
+            note = "second read failed - values not cross-checked"
+            print(f"[extract] {note}: {str(exc).splitlines()[0]}", flush=True)
+            drawing.general_notes = f"{drawing.general_notes}; {note}" if drawing.general_notes else note
+        else:
+            drawing = cross_check(drawing, other)
+    return drawing
+
+
+def _read_with_fallback(client, models: list[str], contents: list,
+                        deadline_s: float, call_timeout_s: float) -> Drawing:
+    """One read of the drawing, with the retry / model fallback policy."""
     start = _clock()
     errors: list[str] = []
     for m in models:
@@ -789,3 +834,86 @@ def extract_drawing(
             print(f"[extract] {m}: read OK in {_clock() - t0:.0f}s", flush=True)
             return drawing
     raise ExtractionError("Gemini extraction failed on all models:\n  " + "\n  ".join(errors))
+
+
+# --------------------------------------------------------------------------
+# Second-read cross-check
+# --------------------------------------------------------------------------
+def _same_num(x, y) -> bool:
+    x, y = float(x), float(y)
+    return abs(x - y) <= max(1.0, 0.005 * max(abs(x), abs(y)))
+
+
+def _same_glass(x, y) -> bool:
+    from .glass_types import canonical_glass_type
+
+    cx, cy = canonical_glass_type(str(x)), canonical_glass_type(str(y))
+    if cx is not None and cy is not None:
+        return cx == cy
+    return str(x).strip().lower() == str(y).strip().lower()
+
+
+def _pair_panels(a: list[Panel], b: list[Panel]) -> list[tuple[Panel, Panel]]:
+    """Pair panels of two reads: same ID, then same size, then (only when both
+    reads found the same number of panels) by position."""
+    pairs: list[tuple[Panel, Panel]] = []
+    left = list(range(len(b)))
+    unpaired: list[int] = []
+    for i, p in enumerate(a):
+        k = next((k for k in left if b[k].panel_id.strip().upper() == p.panel_id.strip().upper()), None)
+        if k is None:
+            k = next((k for k in left
+                      if None not in (p.width_mm.value, p.height_mm.value, b[k].width_mm.value, b[k].height_mm.value)
+                      and _same_num(p.width_mm.value, b[k].width_mm.value)
+                      and _same_num(p.height_mm.value, b[k].height_mm.value)), None)
+        if k is None:
+            unpaired.append(i)
+            continue
+        pairs.append((p, b[k]))
+        left.remove(k)
+    if len(a) == len(b):
+        for i, k in zip(unpaired, left):
+            pairs.append((a[i], b[k]))
+    return pairs
+
+
+def cross_check(first: Drawing, second: Drawing) -> Drawing:
+    """Keep the first read; wherever BOTH reads have a value and they differ,
+    make the value CHECK (clear=False) and record why. A value only one read
+    found is not a disagreement (the other read may simply have missed it)."""
+    d = first.model_copy(deep=True)
+
+    def check(label: str, fa: Field, fb: Field, issues: list[str], same=_same_num) -> None:
+        if fa.value is None or fb.value is None or same(fa.value, fb.value):
+            return
+        fa.clear = False
+        issues.append(f"second read disagreed on {label}: {_fmt_any(fa.value)} vs {_fmt_any(fb.value)}")
+
+    check("overall width", d.overall_width_mm, second.overall_width_mm, d.extraction_issues)
+    check("overall height", d.overall_height_mm, second.overall_height_mm, d.extraction_issues)
+    if len(d.panels) != len(second.panels):
+        d.extraction_issues.append(
+            f"second read found {len(second.panels)} panels, first read {len(d.panels)} - check the panel list")
+
+    for pa, pb in _pair_panels(d.panels, second.panels):
+        iss = pa.extraction_issues
+        check("width", pa.width_mm, pb.width_mm, iss)
+        check("height", pa.height_mm, pb.height_mm, iss)
+        if pa.quantity.shown and pb.quantity.shown:
+            check("qty", pa.quantity, pb.quantity, iss)
+        check("thickness", pa.thickness_mm, pb.thickness_mm, iss)
+        check("glass type", pa.glass_type, pb.glass_type, iss, same=_same_glass)
+        if len(pa.holes) != len(pb.holes):
+            iss.append(f"second read found {len(pb.holes)} holes, first read {len(pa.holes)}")
+        else:
+            da = sorted(h.diameter_mm.value for h in pa.holes if h.diameter_mm.value is not None)
+            db = sorted(h.diameter_mm.value for h in pb.holes if h.diameter_mm.value is not None)
+            if len(da) == len(db) and not all(_same_num(x, y) for x, y in zip(da, db)):
+                for h in pa.holes:
+                    h.diameter_mm.clear = False
+                iss.append(f"second read disagreed on hole diameters: {da} vs {db}")
+    return d
+
+
+def _fmt_any(v) -> str:
+    return _fmt_num(v) if isinstance(v, (int, float)) else str(v)

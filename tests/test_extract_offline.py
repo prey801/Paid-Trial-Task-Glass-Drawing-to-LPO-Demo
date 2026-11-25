@@ -355,7 +355,8 @@ def isolated_env(monkeypatch):
     """Never touch the real .env / key / model list."""
     import dotenv
 
-    for k in ("GEMINI_API_KEY", "GOOGLE_API_KEY", "GEMINI_MODEL", "GEMINI_DEADLINE_S", "GEMINI_CALL_TIMEOUT_S"):
+    for k in ("GEMINI_API_KEY", "GOOGLE_API_KEY", "GEMINI_MODEL", "GEMINI_DEADLINE_S", "GEMINI_CALL_TIMEOUT_S",
+              "GLASS_LPO_SECOND_READ"):
         monkeypatch.delenv(k, raising=False)
     monkeypatch.setattr(dotenv, "load_dotenv", lambda *a, **k: False)
     monkeypatch.setattr(dotenv, "find_dotenv", lambda *a, **k: "")
@@ -510,3 +511,85 @@ def test_real_sdk_errors_classified():
     assert extract._classify(errors.ClientError(401, {"error": {"message": "bad key"}})) == "fatal"
     assert extract._classify(errors.ClientError(429, {"error": {"message": "quota"}})) == "next"
     assert extract._classify(errors.ServerError(503, {"error": {"message": "busy"}})) == "retry"
+
+
+# --- second read cross-check ------------------------------------------------
+import copy
+
+
+def sample_with(**changes):
+    """SAMPLE with panel A fields replaced, e.g. width=900."""
+    s = copy.deepcopy(SAMPLE)
+    a = s["panels"][0]
+    for k, v in changes.items():
+        if k == "width":
+            a["width_mm"] = num(v)
+        elif k == "glass":
+            a["glass_type"] = {"value": v, "legible": "clear", "raw_text": v}
+        elif k == "holes":
+            a["holes"][0]["count"] = v
+        elif k == "drop_panel":
+            s["panels"] = s["panels"][:1]
+    return s
+
+
+def test_second_read_off_by_default(image, clock):
+    _, c = run_fake(image, clock, {"m1": [ok()]})
+    assert c.calls == ["m1"]
+
+
+def test_second_read_agreeing_changes_nothing(image, clock):
+    d, c = run_fake(image, clock, {"m1": [ok(), ok()]}, second_read=True)
+    assert c.calls == ["m1", "m1"]
+    a = d.panels[0]
+    assert a.width_mm.clear and a.extraction_issues == [] and d.extraction_issues == []
+
+
+def test_second_read_uses_original_only(image, clock, tmp_path):
+    orig = tmp_path / "orig.jpg"
+    orig.write_bytes(image.read_bytes())
+    _, c = run_fake(image, clock, {"m1": [ok(), ok()]}, original_path=orig, second_read=True)
+    first = [p for p in c.kwargs[0]["contents"] if not isinstance(p, str)]
+    second = [p for p in c.kwargs[1]["contents"] if not isinstance(p, str)]
+    assert len(first) == 2 and len(second) == 1
+
+
+def test_second_read_disagreement_becomes_check(image, clock):
+    d, _ = run_fake(image, clock, {"m1": [ok(), ok(sample_with(width=900))]}, second_read=True)
+    a = d.panels[0]
+    assert a.width_mm.value == 1000 and not a.width_mm.clear
+    assert any("second read disagreed on width: 1000 vs 900" in i for i in a.extraction_issues)
+    v = validate(d)
+    assert v.panels[0].confidence == Confidence.LOW
+
+
+def test_second_read_same_glass_different_words_agree(image, clock):
+    d, _ = run_fake(image, clock, {"m1": [ok(sample_with(glass="DGU")), ok(sample_with(glass="14mm unit"))]},
+                    second_read=True)
+    assert d.panels[0].glass_type.clear
+
+
+def test_second_read_hole_and_panel_count(image, clock):
+    d, _ = run_fake(image, clock, {"m1": [ok(), ok(sample_with(holes=3, drop_panel=True))]}, second_read=True)
+    assert any("found 3 holes, first read 2" in i for i in d.panels[0].extraction_issues)
+    assert any("found 1 panels, first read 2" in i for i in d.extraction_issues)
+
+
+def test_second_read_missing_value_is_not_a_disagreement(image, clock):
+    s2 = copy.deepcopy(SAMPLE)
+    s2["overall_width_mm"] = NOT
+    d, _ = run_fake(image, clock, {"m1": [ok(), ok(s2)]}, second_read=True)
+    assert d.overall_width_mm.clear and d.extraction_issues == []
+
+
+def test_second_read_failure_keeps_first_read(image, clock):
+    d, _ = run_fake(image, clock, {"m1": [ok(), APIErr(404)], "m2": [APIErr(404)], "m3": [APIErr(404)]},
+                    second_read=True)
+    assert d.panels[0].width_mm.clear
+    assert "second read failed" in d.general_notes
+
+
+def test_second_read_from_env(image, clock, monkeypatch):
+    monkeypatch.setenv("GLASS_LPO_SECOND_READ", "1")
+    _, c = run_fake(image, clock, {"m1": [ok(), ok()]})
+    assert c.calls == ["m1", "m1"]

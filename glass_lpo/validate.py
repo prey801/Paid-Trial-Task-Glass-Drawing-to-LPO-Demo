@@ -20,6 +20,7 @@ from itertools import combinations
 from typing import Optional
 
 from .export_excel import fmt_num
+from .glass_types import canonical_glass_type, is_generic_glass_word
 from .schema import Confidence, Drawing, Field, Panel
 
 MIN_DIM_MM = 50
@@ -32,18 +33,6 @@ QTY_MIN, QTY_MAX = 1, 500
 MAX_GRID_PANELS = 12  # subset-sum layout check is skipped above this
 
 HARD, SOFT = "hard", "soft"
-
-# Words that show a "glass type" really is a glass type (and not, say, the
-# drawing title read into the wrong box).
-GLASS_WORDS = (
-    "clear", "float", "frost", "sandblast", "tint", "bronze", "grey", "gray",
-    "green", "blue", "toughen", "temper", "laminat", "reflect", "mirror",
-    "low-e", "low e", "lowe", "wired", "wire", "pattern", "acid", "etch",
-    "obscure", "satin", "opal", "fluted", "reeded", "glass", "annealed",
-    "extra clear", "starphire", "optiwhite", "dgu", "double glaz", "insulat",
-    "solar", "heat", "fire", "safety", "privacy", "colou", "painted",
-    "back painted", "lacquer", "euro grey", "smoked",
-)
 
 # Panel flag texts that validate emits and export_excel.review_items() hoists.
 QTY_NOT_WRITTEN = "qty not written - assumed 1"
@@ -126,8 +115,28 @@ def parse_size(text: Optional[str]) -> Optional[tuple[float, float]]:
 
 
 def glass_type_recognised(text: str) -> bool:
-    t = text.lower()
-    return any(w in t for w in GLASS_WORDS)
+    return canonical_glass_type(text) is not None
+
+
+def _normalise_glass_type(p: Panel) -> None:
+    """Map the written glass type onto the fixed vocabulary (glass_types.py).
+    'glass' on its own (a glazed area, or a title) is not a type: it is
+    dropped with a note. Unrecognised text is kept and flagged later."""
+    gt = p.glass_type
+    if gt.value is None or not str(gt.value).strip():
+        return
+    written = str(gt.value).strip()
+    canon = canonical_glass_type(written)
+    if canon and canon != written:
+        p.glass_type = Field(value=canon, clear=gt.clear, shown=gt.shown)
+        note = f"glass type written '{written}' = {canon}"
+    elif canon is None and gt.clear and is_generic_glass_word(written):
+        p.glass_type = Field(value=None, clear=False, shown=False)
+        note = f"'{written}' is not a glass type - ignored"
+    else:
+        return
+    if note not in p.notes:
+        p.notes = f"{p.notes}; {note}" if p.notes else note
 
 
 def _check_position(c: _Collector, label: str, text: Optional[str], w: Optional[float], h: Optional[float]) -> None:
@@ -196,6 +205,7 @@ def _check_panel(p: Panel, skip: set[str] = frozenset()) -> _Collector:
         if float(t) not in STANDARD_THICKNESS_MM:
             c.hard(f"thickness {_n(t)} mm not standard")
 
+    _normalise_glass_type(p)
     gt = p.glass_type
     if gt.shown or gt.value is not None:
         if gt.value is None or not str(gt.value).strip():
