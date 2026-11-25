@@ -36,6 +36,9 @@ FACTORS = {"cm": 10.0, "m": 1000.0, "inch": 25.4, "ft": 304.8,
 UNIT_TO_MM = {"mm": 1.0, "cm": 10.0, "m": 1000.0, "inch": 25.4, "ft": 304.8}
 HOLE_MIN_MM = 4.0
 MIN_DIM_MM, MAX_DIM_MM = 50.0, 6000.0
+# No unit written and, read as cm, the LARGEST size is below this: too small
+# for a window/door/panel, so the unit is doubtful (often feet) -> CHECK.
+MIN_PLAUSIBLE_MAX_MM = 300.0
 _NUM = re.compile(r"\d+(?:\.\d+)?")
 
 
@@ -124,6 +127,17 @@ def _scale_text(f: Field, k: float) -> None:
         f.value = _NUM.sub(lambda m: f"{float(m.group()) * k:g}", f.value)
 
 
+def _unit_doubtful(d: Drawing, reason: str) -> None:
+    """The unit cannot be trusted: leave every size as written, make each one
+    CHECK, and say why."""
+    for f in [d.overall_width_mm, d.overall_height_mm] + [x for p in d.panels for x in (p.width_mm, p.height_mm)]:
+        if f.value is not None:
+            f.clear = False
+    d.units_written = "unknown"
+    if reason not in d.extraction_issues:
+        d.extraction_issues.append(reason)
+
+
 def convert_to_mm(d: Drawing) -> None:
     """Convert `d` in place to mm. Idempotent: sets units_written='mm' and
     records what it did in `units_converted_from`."""
@@ -135,6 +149,11 @@ def convert_to_mm(d: Drawing) -> None:
     if unit == "none":
         sizes = [f.value for f in (d.overall_width_mm, d.overall_height_mm) if f.value is not None]
         sizes += [f.value for p in d.panels for f in (p.width_mm, p.height_mm) if f.value is not None]
+        if sizes and max(sizes) * k < MIN_PLAUSIBLE_MAX_MM:
+            _unit_doubtful(d, f"no unit written, and read as cm the largest size would be "
+                              f"{max(sizes) * k:g} mm - too small for glass; the unit may be "
+                              "feet or inches - sizes left as written (CHECK)")
+            return
         if sizes and max(sizes) * k > MAX_DIM_MM and all(MIN_DIM_MM <= v <= MAX_DIM_MM for v in sizes):
             d.units_written = "mm"
             d.units_converted_from = ("no unit written - as cm the sizes would exceed "

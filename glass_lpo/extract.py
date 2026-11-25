@@ -426,6 +426,15 @@ def _apply_written_units(wire: WireDrawing, notes_by_panel: dict[int, list[str]]
             unitless.append((label, w, i, num))
 
     if not own:
+        if unit == "none":
+            fr = [w.raw_text.strip() for _, w, _ in dims if has_fraction(w.raw_text)]
+            if fr:  # metric sizes are not written as fractions: feet or inches, but which?
+                for _, w, _ in dims:
+                    if w.value is not None:
+                        w.legible = "unclear"
+                return "unknown", "", [
+                    f"sizes written with fractions (e.g. '{fr[0]}') but no unit - fractions mean "
+                    "feet or inches, not cm; sizes left as written (CHECK)"]
         return unit, "", []
 
     issues: list[str] = []

@@ -177,3 +177,29 @@ def test_mm_thickness_untouched():
     d = wire_to_drawing({"units_written": "mm", "panels": [wpanel(n("500", 500), n("500", 500),
                                                                  thickness_mm=n("12mm", 12))]})
     assert d.panels[0].thickness_mm.value == 12 and d.panels[0].thickness_mm.clear
+
+
+def test_no_unit_too_small_as_cm_is_check_not_converted():
+    # "7" x "10.8" with no unit: as cm a 70 x 108 mm window - not believable.
+    d = validate(wire_to_drawing({"units_written": "none written",
+                                  "panels": [wpanel(n("7", 7), n("10.8", 10.8))]}))
+    p = d.panels[0]
+    assert (p.width_mm.value, p.height_mm.value) == (7, 10.8)
+    assert not p.width_mm.clear and not p.height_mm.clear
+    assert any("too small for glass" in f for f in d.flags)
+
+
+def test_no_unit_normal_cm_door_still_converted():
+    d = validate(wire_to_drawing({"units_written": "none written",
+                                  "panels": [wpanel(n("90", 90), n("210", 210))]}))
+    p = d.panels[0]
+    assert (p.width_mm.value, p.height_mm.value) == (900, 2100) and p.width_mm.clear
+
+
+def test_no_unit_with_fraction_is_check():
+    d = validate(wire_to_drawing({"units_written": "none written",
+                                  "overall_height_mm": n("10 1/2", 10.5),
+                                  "panels": [wpanel(n("20", 20), n("40", 40))]}))
+    assert d.overall_height_mm.value == 10.5 and not d.overall_height_mm.clear
+    assert not d.panels[0].width_mm.clear
+    assert any("fractions mean feet or inches" in f for f in d.flags)
