@@ -161,9 +161,9 @@ def test_extraction_issues_are_hard():
 
 
 def test_units_not_mm_hard_and_all_low():
-    # inch / unknown units are never converted -> hard CHECK (cm/m are converted, see test_units.py)
-    d = validate(Drawing(panels=[panel("P1"), panel("P2")], units_written="inch"))
-    assert has(d.flags, "Units written in inch - values NOT converted (CHECK)")
+    # mixed / unknown units are never converted -> hard CHECK (mm/cm/m/inch/ft are, see test_units.py)
+    d = validate(Drawing(panels=[panel("P1"), panel("P2")], units_written="mixed"))
+    assert has(d.flags, "Units written in mixed - values NOT converted (CHECK)")
     assert all(p.confidence == Confidence.LOW for p in d.panels)
     items = review_items(LPO(lpo_no="L", date="2026-01-01", source_image="", drawing=d))
     assert sum("units" in t.lower() for _, t in items) == 1  # listed once

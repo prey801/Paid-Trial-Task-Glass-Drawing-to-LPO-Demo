@@ -11,7 +11,13 @@ mm - never silently: the drawing gets a flag saying it was assumed.
                            6000 mm sheet limit while the numbers as written are
                            sensible mm (50-6000), keep them as mm instead -
                            also flagged, so a human confirms the unit.
-  inch / unrecognised   -> NOT converted, hard CHECK (validate.py)
+  written inch / ft     -> converted (x25.4 / x304.8), noted - fractions such
+                           as "107 7/8" or "3/8" are read from the text
+  mixed / unrecognised  -> NOT converted, hard CHECK (validate.py)
+
+Mixed units (e.g. "2.95m" next to "75cm"): extract.py reads the unit written
+next to EACH number (`parse_length`) and converts that value on its own, so a
+drawing does not need a single unit to be usable.
 
 Thickness is never converted: glass thickness is always quoted in mm
 ("10mm toughened") whatever unit the sizes use.
@@ -25,10 +31,86 @@ import re
 
 from .schema import Drawing, Field
 
-FACTORS = {"cm": 10.0, "m": 1000.0, "none": 10.0}  # "none" = not written -> assume cm
+FACTORS = {"cm": 10.0, "m": 1000.0, "inch": 25.4, "ft": 304.8,
+           "none": 10.0}  # "none" = not written -> assume cm
+UNIT_TO_MM = {"mm": 1.0, "cm": 10.0, "m": 1000.0, "inch": 25.4, "ft": 304.8}
 HOLE_MIN_MM = 4.0
 MIN_DIM_MM, MAX_DIM_MM = 50.0, 6000.0
 _NUM = re.compile(r"\d+(?:\.\d+)?")
+
+
+# ---------------------------------------------------------------------------
+# Reading a length (number + unit) from the text exactly as written
+# ---------------------------------------------------------------------------
+_UNICODE_FRAC = {"½": 0.5, "¼": 0.25, "¾": 0.75, "⅛": 0.125, "⅜": 0.375,
+                 "⅝": 0.625, "⅞": 0.875, "⅓": 1 / 3, "⅔": 2 / 3}
+_UNIT_WORD = {
+    "mm": "mm", "millimetre": "mm", "millimetres": "mm", "millimeter": "mm", "millimeters": "mm",
+    "cm": "cm", "centimetre": "cm", "centimetres": "cm", "centimeter": "cm", "centimeters": "cm",
+    "m": "m", "metre": "m", "metres": "m", "meter": "m", "meters": "m", "mtr": "m", "mtrs": "m",
+    "ft": "ft", "feet": "ft", "feets": "ft", "foot": "ft", "fts": "ft", "'": "ft", "′": "ft", "’": "ft",
+    "in": "inch", "inch": "inch", "inches": "inch", "ins": "inch", '"': "inch", "″": "inch",
+    "''": "inch", "”": "inch",
+}
+_FR = "".join(_UNICODE_FRAC)
+# A number: "3/8" | "107 7/8" / "107-7/8" | "3⅜" / "⅜" | "2.95"
+_NUMBER = re.compile(
+    rf"(?P<frac>\d+)\s*/\s*(?P<den>\d+)"
+    rf"|(?P<whole>\d+(?:\.\d+)?)(?:\s*[- ]\s*(?P<fn>\d+)\s*/\s*(?P<fd>\d+)|\s*(?P<uf>[{_FR}]))?"
+    rf"|(?P<lone>[{_FR}])")
+_UNIT_AFTER = re.compile(r"\s*(''|[a-z]+|[\"'″′’”])", re.IGNORECASE)
+# Annotations that contain a slash but are not fractions: "O/A" (overall), "c/c".
+_NOT_FRACTION = re.compile(r"\b[a-z]\s*/\s*[a-z]\b", re.IGNORECASE)
+
+
+def _number_value(m: re.Match) -> float:
+    if m.group("frac"):
+        return float(m.group("frac")) / float(m.group("den"))
+    if m.group("lone"):
+        return _UNICODE_FRAC[m.group("lone")]
+    v = float(m.group("whole"))
+    if m.group("fn"):
+        v += float(m.group("fn")) / float(m.group("fd"))
+    elif m.group("uf"):
+        v += _UNICODE_FRAC[m.group("uf")]
+    return v
+
+
+def parse_length(text: str) -> tuple[float | None, str | None]:
+    """Read a length as written: returns (number, unit) with the number in the
+    WRITTEN unit, or (number, None) if no unit is written next to it.
+
+      "2.95m" -> (2.95, "m")       "75cm" -> (75, "cm")     "1200" -> (1200, None)
+      "107 7/8" -> (107.875, None) "3/8\"" -> (0.375, "inch")
+      "4 feet" -> (4, "ft")        "4'6\"" -> (54, "inch")  "2050 O/A" -> (2050, None)
+    """
+    t = _NOT_FRACTION.sub(" ", text or "")
+    found: list[tuple[float, str | None]] = []
+    for m in _NUMBER.finditer(t):
+        unit = None
+        u = _UNIT_AFTER.match(t, m.end())
+        if u:
+            unit = _UNIT_WORD.get(u.group(1).lower())
+        found.append((_number_value(m), unit))
+    if not found:
+        return None, None
+    if len(found) >= 2 and found[0][1] == "ft" and found[1][1] in ("inch", None):
+        return found[0][0] * 12 + found[1][0], "inch"      # 4' 6" -> 54 inches
+    return found[0]
+
+
+def has_fraction(text: str) -> bool:
+    t = _NOT_FRACTION.sub(" ", text or "")
+    return bool(re.search(rf"\d\s*/\s*\d|[{_FR}]", t))
+
+
+def units_in_text(text: str) -> set[str]:
+    """Every unit word in free text such as "m and cm" -> {"m", "cm"}."""
+    out = set()
+    for tok in re.findall(r"''|[a-z]+|[\"'″′’”]", (text or "").lower()):
+        if tok in _UNIT_WORD:
+            out.add(_UNIT_WORD[tok])
+    return out
 
 
 def _scale(f: Field, k: float) -> None:

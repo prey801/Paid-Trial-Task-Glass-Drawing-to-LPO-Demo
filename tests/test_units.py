@@ -80,3 +80,100 @@ def test_safety_rule_not_used_when_as_written_is_implausible_too():
     d.overall_width_mm = F(9000)
     out = validate(d)
     assert "assumed cm" in out.units_converted_from
+
+
+# --- units read from the text written beside each number -----------------
+import pytest
+
+from glass_lpo.extract import normalise_units, wire_to_drawing
+from glass_lpo.units import parse_length
+
+
+@pytest.mark.parametrize("text,expected", [
+    ("2.95m", (2.95, "m")), ("75cm", (75, "cm")), ("1200", (1200, None)),
+    ("107 7/8", (107.875, None)), ("3/8\"", (0.375, "inch")), ("4 feet", (4, "ft")),
+    ("3.5 feets", (3.5, "ft")), ("4'6\"", (54, "inch")), ("2050 O/A", (2050, None)),
+    ("3⅜", (3.375, None)), ("12mm", (12, "mm")), ("", (None, None)),
+])
+def test_parse_length(text, expected):
+    assert parse_length(text) == expected
+
+
+@pytest.mark.parametrize("written,expected", [
+    ("feet", "ft"), ("ft", "ft"), ("m and cm", "mixed"), ("m, cm", "mixed"), ("inch", "inch"),
+])
+def test_normalise_units_feet_and_mixed(written, expected):
+    assert normalise_units(written) == expected
+
+
+def n(raw, v, legible="clear"):
+    return {"raw_text": raw, "other_possible_readings": [], "value": v, "legible": legible}
+
+
+def wpanel(w, h, **kw):
+    return {"width_mm": w, "width_source": "own_dimension",
+            "height_mm": h, "height_source": "own_dimension", **kw}
+
+
+def test_mixed_m_and_cm_each_converted():
+    d = validate(wire_to_drawing({
+        "units_written": "m, cm",
+        "overall_width_mm": n("2.95m", 2.95), "overall_height_mm": n("2.4m", 2.4),
+        "panels": [wpanel(n("75cm", 75), n("97cm", 97))]}))
+    assert (d.overall_width_mm.value, d.overall_height_mm.value) == (2950, 2400)
+    p = d.panels[0]
+    assert (p.width_mm.value, p.height_mm.value) == (750, 970)
+    assert p.width_mm.clear and p.height_mm.clear
+    assert not any("NOT converted" in f for f in d.flags)
+    assert any("each converted to mm" in f for f in d.flags)   # still asks for a confirm
+
+
+def test_model_already_converted_value_is_not_scaled_twice():
+    d = wire_to_drawing({"units_written": "m", "panels": [wpanel(n("2.95m", 2950), n("2.4m", 2.4))]})
+    assert (d.panels[0].width_mm.value, d.panels[0].height_mm.value) == (2950, 2400)
+    assert d.panels[0].width_mm.clear
+
+
+def test_model_value_disagreeing_with_its_raw_text_is_check():
+    d = wire_to_drawing({"units_written": "cm", "panels": [wpanel(n("75cm", 57), n("97cm", 97))]})
+    assert d.panels[0].width_mm.value == 750 and not d.panels[0].width_mm.clear
+
+
+def test_feet_converted():
+    d = validate(wire_to_drawing({"units_written": "feet",
+                                  "panels": [wpanel(n("2 ft", 2), n("4 feet", 4))]}))
+    p = d.panels[0]
+    assert (p.width_mm.value, p.height_mm.value) == (609.6, 1219.2)
+
+
+def test_inches_with_fraction_no_unit_beside_number():
+    # unit only stated for the drawing: converted by units.convert_to_mm
+    d = validate(wire_to_drawing({"units_written": "inch",
+                                  "overall_width_mm": n("107 7/8", 107.875),
+                                  "panels": [wpanel(n("20", 20), n("40", 40))]}))
+    assert d.overall_width_mm.value == 2740.0
+    assert d.panels[0].width_mm.value == 508.0
+    assert any("inch" in f and "converted" in f for f in d.flags)
+
+
+def test_unitless_number_on_mixed_drawing_is_check():
+    d = wire_to_drawing({"units_written": "mixed",
+                         "overall_width_mm": n("2.95m", 2.95),
+                         "panels": [wpanel(n("75", 75), n("97cm", 97))]})
+    p = d.panels[0]
+    assert p.width_mm.value == 75 and not p.width_mm.clear
+    assert "no unit written next to it" in p.notes
+
+
+def test_fraction_thickness_read_as_inches_and_checked():
+    d = validate(wire_to_drawing({"units_written": "inch", "panels": [
+        wpanel(n("20", 20), n("40", 40), thickness_mm=n("3/8", 0.375))]}))
+    t = d.panels[0].thickness_mm
+    assert t.value == 9.5 and not t.clear
+    assert "read as inches" in d.panels[0].notes
+
+
+def test_mm_thickness_untouched():
+    d = wire_to_drawing({"units_written": "mm", "panels": [wpanel(n("500", 500), n("500", 500),
+                                                                 thickness_mm=n("12mm", 12))]})
+    assert d.panels[0].thickness_mm.value == 12 and d.panels[0].thickness_mm.clear

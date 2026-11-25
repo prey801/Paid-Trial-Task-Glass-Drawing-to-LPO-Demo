@@ -133,16 +133,33 @@ def _score_diameters(s: Score, pid: str, p: Panel, want: list[float]) -> None:
         s.details.append(f"MISSING {pid} hole dia {w}")
 
 
+def _same_size(p: Panel, tp: dict) -> bool:
+    tw, th = tp.get("width_mm"), tp.get("height_mm")
+    if tw is None or th is None or p.width_mm.value is None or p.height_mm.value is None:
+        return False
+    return abs(float(p.width_mm.value) - tw) <= TOL_MM and abs(float(p.height_mm.value) - th) <= TOL_MM
+
+
 def _match_panels(drawing: Drawing, truth_panels: list[dict]) -> list[Optional[Panel]]:
-    """By panel ID first, then by position among the still-unused panels.
-    Each extracted panel is matched at most once."""
+    """Match each truth panel to at most one extracted panel:
+    1. same width AND height (most panel IDs are not written on hand drawings,
+       so P2 in the output need not be P2 in the truth),
+    2. then by panel ID, 3. then by position among the still-unused panels."""
     got = drawing.panels
     used: set[int] = set()
     out: list[Optional[Panel]] = [None] * len(truth_panels)
+    for i, tp in enumerate(truth_panels):
+        for k, p in enumerate(got):
+            if k not in used and _same_size(p, tp):
+                out[i] = p
+                used.add(k)
+                break
     by_id: dict[str, int] = {}
     for k, p in enumerate(got):
         by_id.setdefault(p.panel_id.strip().upper(), k)
     for i, tp in enumerate(truth_panels):
+        if out[i] is not None:
+            continue
         k = by_id.get(str(tp["panel_id"]).strip().upper())
         if k is not None and k not in used:
             out[i] = got[k]

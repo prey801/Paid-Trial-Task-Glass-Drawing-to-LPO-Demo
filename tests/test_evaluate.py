@@ -121,3 +121,12 @@ def test_truth_files_parse(name):
         pytest.skip("sample truth missing")
     s = score(Drawing(), t)
     assert s.missing > 0 and s.correct == 0
+
+
+def test_panels_matched_by_size_before_id(tmp_path):
+    # Output numbered the window P2 (IDs not written); the truth calls it P3.
+    t = truth_file(tmp_path, [tpanel("P1", w=None, h=None), tpanel("P2", w=None, h=None),
+                              tpanel("P3", w=750, h=970)])
+    s = score(Drawing(panels=[gpanel("P1", w=None, h=None), gpanel("P2", w=750, h=970)]), t)
+    assert not any("P3 width" in d or "P3 height" in d for d in s.details)
+    assert any("MISSING panel P2" in d for d in s.details)

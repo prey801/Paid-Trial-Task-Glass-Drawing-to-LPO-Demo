@@ -188,9 +188,9 @@ def test_pdf_content_for_cutter_and_review(tmp_path):
 
 def test_pdf_units_warning(tmp_path):
     d = raw_drawing()
-    d.units_written = "inch"   # inches are never converted (cm/m are - see test_units.py)
-    txt = pdf_text(write_pdf(fixture_lpo(d), tmp_path / "inch.pdf"))
-    assert "NOT converted" in txt and "Units written in inch" in txt
+    d.units_written = "unknown"   # unrecognised units are never converted
+    txt = pdf_text(write_pdf(fixture_lpo(d), tmp_path / "unknown.pdf"))
+    assert "NOT converted" in txt and "Units written in unknown" in txt
 
 
 def test_pdf_stress_still_one_page(tmp_path):

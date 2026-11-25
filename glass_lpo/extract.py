@@ -31,6 +31,7 @@ from pydantic import BaseModel, ValidationError
 from pydantic import Field as PydField
 
 from .schema import Drawing, Feature, Field, Hole, Panel
+from .units import UNIT_TO_MM, has_fraction, parse_length, units_in_text
 
 # Fallback order, first model tried first. 3.5-flash leads because it has been
 # the most reliable (3.8/3.7 are often 503-busy or rate-limited).
@@ -138,8 +139,13 @@ GOLDEN RULE - REPORT ONLY WHAT IS WRITTEN
 
 GLASS DRAWING CONVENTIONS
 - units_written: the unit written on the drawing for SIZES ("mm", "cm", "m",
-  "inch") or "none written" if no unit appears anywhere. Do not assume a unit.
-  Report every number exactly as written - never convert (e.g. "90" stays 90).
+  "inch", "ft"), "mixed" if different sizes use different units (e.g. "2.95m"
+  and "75cm"), or "none written" if no unit appears anywhere. Do not assume a
+  unit. Report every number exactly as written - never convert (e.g. "90"
+  stays 90, "2.95m" stays 2.95, "4 feet" stays 4).
+- raw_text MUST include the unit written next to that number, if any
+  ("2.95m", "75cm", "4 feet", "3/8\""), and fractions exactly as written
+  ("107 7/8") - the unit is read from raw_text.
   Glass thickness is always mm. A hole diameter is reported as written
   (e.g. "Ø25" -> 25, "Ø2.5" -> 2.5).
 - Width = horizontal dimension, height = vertical dimension as drawn.
@@ -339,27 +345,105 @@ def _feature(w: WireFeature) -> Feature:
 
 MAX_HOLES_PER_ENTRY = 50
 
-_UNIT_WORDS = {
-    "mm": {"mm", "millimetre", "millimetres", "millimeter", "millimeters"},
-    "cm": {"cm", "centimetre", "centimetres", "centimeter", "centimeters"},
-    "m": {"m", "metre", "metres", "meter", "meters"},
-    "inch": {"in", "inch", "inches", '"', "''"},
-}
 _NO_UNITS = {"", "none", "none written", "not written", "not shown", "n/a", "na"}
 
 
 def normalise_units(text: str) -> str:
-    """'MM' -> 'mm', 'Inches' -> 'inch', '' / 'none written' -> 'none'
-    (units.py then assumes cm), anything unrecognised -> 'unknown'.
-    Values are returned as written; conversion happens in units.py."""
+    """'MM' -> 'mm', 'Inches' -> 'inch', 'feet' -> 'ft', '' / 'none written' ->
+    'none' (units.py then assumes cm), two different units ('m and cm') ->
+    'mixed', anything unrecognised -> 'unknown'.
+    Values are returned as written; conversion happens later."""
     t = (text or "").strip().lower()
     if t in _NO_UNITS:
         return "none"
-    t = t.rstrip(".").strip()
-    for unit, words in _UNIT_WORDS.items():
-        if t in words:
-            return unit
-    return "unknown"
+    found = units_in_text(t)
+    if len(found) == 1:
+        return found.pop()
+    return "mixed" if found else "unknown"
+
+
+def _close(a: float, b: float) -> bool:
+    return abs(a - b) <= max(0.5, 0.005 * abs(b))
+
+
+def _to_mm(w: WireNumber, num: float, unit: str) -> None:
+    """Set w.value to `num` (in `unit`) as mm. If the model's own value matches
+    neither the written number nor its mm conversion, it disagrees with its own
+    transcription -> unclear."""
+    mm = round(num * UNIT_TO_MM[unit], 1)
+    v = w.value
+    if v is not None and not (_close(v, num) or _close(v, mm)):
+        w.legible = "unclear"
+    w.value = mm
+    alts = []
+    for a in w.other_possible_readings:  # keep alternatives in the same unit as value
+        an, au = parse_length(str(a))
+        alts.append(_fmt_num(round(an * UNIT_TO_MM[au or unit], 1)) if an is not None else a)
+    w.other_possible_readings = alts
+
+
+def _apply_written_units(wire: WireDrawing, notes_by_panel: dict[int, list[str]]) -> tuple[str, str, list[str]]:
+    """Convert sizes using the unit written NEXT TO each number (raw_text).
+
+    Handles drawings that mix units ("2.95m" beside "75cm") and imperial
+    sizes ("4 feet", "107 7/8"). Returns (units_written, units_converted_from,
+    drawing issues). When no number carries its own unit, nothing is changed
+    and the drawing-level unit is converted later by units.convert_to_mm.
+    """
+    unit = normalise_units(wire.units_written)
+    dims: list[tuple[str, WireNumber, int | None]] = [
+        ("overall width", wire.overall_width_mm, None), ("overall height", wire.overall_height_mm, None)]
+    for i, wp in enumerate(wire.panels):
+        dims += [("width", wp.width_mm, i), ("height", wp.height_mm, i)]
+
+    own: set[str] = set()
+    unitless: list[tuple[str, WireNumber, int | None, float | None]] = []
+    for label, w, i in dims:
+        if _is_absent(w) or (w.value is None and not w.raw_text.strip()):
+            continue
+        num, u = parse_length(w.raw_text)
+        if u is not None and num is not None:
+            _to_mm(w, num, u)
+            own.add(u)
+        elif w.value is not None or num is not None:
+            unitless.append((label, w, i, num))
+
+    if not own:
+        return unit, "", []
+
+    issues: list[str] = []
+    used = sorted(own)
+    if unitless and unit in UNIT_TO_MM:
+        for label, w, i, num in unitless:
+            _to_mm(w, num if num is not None else w.value, unit)
+        used = sorted(own | {unit})
+    elif unitless:  # no unit beside these numbers and none for the drawing - can't convert safely
+        for label, w, i, num in unitless:
+            w.legible = "unclear"
+            msg = f"{label}: no unit written next to it - left as written (CHECK)"
+            if i is None:
+                issues.append(msg)
+            else:
+                notes_by_panel.setdefault(i, []).append(msg)
+    conv = ("sizes written in " + " and ".join(used)
+            + " - each converted to mm using the unit written beside it")
+    return "mm", conv, issues
+
+
+def _thickness_from_inches(w: WireNumber, notes: list[str]) -> None:
+    """Glass thickness is quoted in mm - but a "3/8" or 0.375 is inches.
+    Convert to mm and force a CHECK rather than report a 0.375 mm glass."""
+    if _is_absent(w):
+        return
+    num, u = parse_length(w.raw_text)
+    v = num if num is not None else w.value
+    if v is None:
+        return
+    if u in ("inch", "ft") or (u is None and (has_fraction(w.raw_text) or v < 1)):
+        mm = round(v * UNIT_TO_MM["ft" if u == "ft" else "inch"], 1)
+        w.value, w.legible = mm, "unclear"
+        w.other_possible_readings = []
+        notes.append(f'thickness written "{w.raw_text.strip() or _fmt_num(v)}" - read as inches = {mm:g} mm (CHECK)')
 
 
 def wire_to_drawing(wire: WireDrawing | dict | str) -> Drawing:
@@ -368,10 +452,16 @@ def wire_to_drawing(wire: WireDrawing | dict | str) -> Drawing:
         wire = parse_wire_json(wire)
     elif isinstance(wire, dict):
         wire = WireDrawing.model_validate(wire)
+    else:
+        wire = wire.model_copy(deep=True)  # unit handling below edits the numbers
+
+    unit_notes: dict[int, list[str]] = {}
+    units_written, units_conv, unit_issues = _apply_written_units(wire, unit_notes)
 
     panels: list[Panel] = []
     for i, wp in enumerate(wire.panels, start=1):
-        notes: list[str] = []
+        notes: list[str] = list(unit_notes.get(i - 1, []))
+        _thickness_from_inches(wp.thickness_mm, notes)
         issues: list[str] = []
         pid = wp.panel_id.strip() or f"P{i}"
         if not wp.id_written_on_drawing:
@@ -434,7 +524,9 @@ def wire_to_drawing(wire: WireDrawing | dict | str) -> Drawing:
         overall_height_mm=_num_field(wire.overall_height_mm),
         panels=panels,
         general_notes="; ".join(general),
-        units_written=normalise_units(wire.units_written),
+        units_written=units_written,
+        units_converted_from=units_conv,
+        extraction_issues=unit_issues,
     )
 
 
