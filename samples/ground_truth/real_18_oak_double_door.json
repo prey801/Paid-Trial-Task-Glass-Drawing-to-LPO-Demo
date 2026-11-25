@@ -1,0 +1,35 @@
+{
+  "_status": "Confirmed by Brian, written before any system run",
+  "_source": "samples/originals/real_18_oak_double_door.jpg (email attachment 'images 18.jpg')",
+  "_reading": "Joinery drawing, solid oak double door. Overall 1187 O/A wide x 2050 O/A high. Two glazed panels marked '14mm Unit' (double-glazed unit). Glass sizes are NOT dimensioned; only timber sizes are (stiles 90, rails 90/170/700/200). Deriving glass size from these would be a guess, so glass width/height are null.",
+  "overall_width_mm": 1187,
+  "overall_height_mm": 2050,
+  "panels": [
+    {
+      "panel_id": "P1",
+      "width_mm": null,
+      "height_mm": null,
+      "quantity": 1,
+      "thickness_mm": 14,
+      "glass_type": "14mm unit (double glazed)",
+      "hole_count": 0,
+      "hole_diameters_mm": [],
+      "notches_offcuts": 0,
+      "notch_sizes": [],
+      "_note": "Left leaf glass"
+    },
+    {
+      "panel_id": "P2",
+      "width_mm": null,
+      "height_mm": null,
+      "quantity": 1,
+      "thickness_mm": 14,
+      "glass_type": "14mm unit (double glazed)",
+      "hole_count": 0,
+      "hole_diameters_mm": [],
+      "notches_offcuts": 0,
+      "notch_sizes": [],
+      "_note": "Right leaf glass"
+    }
+  ]
+}

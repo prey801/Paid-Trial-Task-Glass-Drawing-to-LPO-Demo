@@ -1,0 +1,47 @@
+{
+  "_status": "Confirmed by Brian, written before any system run",
+  "_source": "samples/originals/real_sd42_three_panel.jpg (email attachment 'sd42teinfr7f1.jpeg', full-res phone photo, rotated)",
+  "_reading": "Three-panel screen in inches. Overall width 107 7/8 in = 2740 mm. Overall height not readable/not written. Marks '3/8' (right end) and '1/4' (left end) between tick marks: meaning unclear (clearance? thickness?) - left null. A top strip over panels 2-3 has 3 circles/half-circles, read as fittings (patch/pivot), NOT drilled holes. Panel widths not written.",
+  "overall_width_mm": 2740.0,
+  "overall_height_mm": null,
+  "panels": [
+    {
+      "panel_id": "P1",
+      "width_mm": null,
+      "height_mm": null,
+      "quantity": 1,
+      "thickness_mm": null,
+      "glass_type": null,
+      "hole_count": 0,
+      "hole_diameters_mm": [],
+      "notches_offcuts": 0,
+      "notch_sizes": []
+    },
+    {
+      "panel_id": "P2",
+      "width_mm": null,
+      "height_mm": null,
+      "quantity": 1,
+      "thickness_mm": null,
+      "glass_type": null,
+      "hole_count": 0,
+      "hole_diameters_mm": [],
+      "notches_offcuts": 0,
+      "notch_sizes": [],
+      "_note": "Top strip with fittings above"
+    },
+    {
+      "panel_id": "P3",
+      "width_mm": null,
+      "height_mm": null,
+      "quantity": 1,
+      "thickness_mm": null,
+      "glass_type": null,
+      "hole_count": 0,
+      "hole_diameters_mm": [],
+      "notches_offcuts": 0,
+      "notch_sizes": [],
+      "_note": "Top strip with fittings above"
+    }
+  ]
+}

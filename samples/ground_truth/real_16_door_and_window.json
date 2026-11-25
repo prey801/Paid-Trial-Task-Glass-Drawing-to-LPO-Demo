@@ -1,0 +1,48 @@
+{
+  "_status": "Confirmed by Brian, written before any system run",
+  "_source": "samples/originals/real_16_door_and_window.jpg (email attachment 'images 16.jpg')",
+  "_reading": "Left: frame 2.95 m wide x 2.4 m high, note '12mm, 2 doors'; inner opening drawn as 3 vertical strips, no per-leaf sizes. Right: 'sliding window' 75 cm wide x 97 cm high, no thickness.",
+  "overall_width_mm": 2950,
+  "overall_height_mm": 2400,
+  "panels": [
+    {
+      "panel_id": "P1",
+      "width_mm": null,
+      "height_mm": null,
+      "quantity": 1,
+      "thickness_mm": 12,
+      "glass_type": null,
+      "hole_count": 0,
+      "hole_diameters_mm": [],
+      "notches_offcuts": 0,
+      "notch_sizes": [],
+      "_note": "Door leaf 1. Leaf size not written (only frame 2950x2400)."
+    },
+    {
+      "panel_id": "P2",
+      "width_mm": null,
+      "height_mm": null,
+      "quantity": 1,
+      "thickness_mm": 12,
+      "glass_type": null,
+      "hole_count": 0,
+      "hole_diameters_mm": [],
+      "notches_offcuts": 0,
+      "notch_sizes": [],
+      "_note": "Door leaf 2. Leaf size not written."
+    },
+    {
+      "panel_id": "P3",
+      "width_mm": 750,
+      "height_mm": 970,
+      "quantity": 1,
+      "thickness_mm": null,
+      "glass_type": null,
+      "hole_count": 0,
+      "hole_diameters_mm": [],
+      "notches_offcuts": 0,
+      "notch_sizes": [],
+      "_note": "Sliding window. Thickness not written."
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "_status": "Confirmed by Brian, written before any system run",
+  "_source": "samples/originals/real_17_windows_and_door.jpg (email attachment 'images 17.jpg')",
+  "_reading": "Windows x2: 4 ft wide x 4 ft high (height digit is overwritten), bottom split '2 ft | 4 feet | 2 ft' read as two 2 ft sashes in a 4 ft frame. Door x1: 3.5 ft wide x 7 ft high (digit unclear); top half glass, bottom half aluminium; glass size not written. Imperial converted at 1 ft = 304.8 mm.",
+  "overall_width_mm": 1219.2,
+  "overall_height_mm": 1219.2,
+  "panels": [
+    {
+      "panel_id": "P1",
+      "width_mm": 609.6,
+      "height_mm": 1219.2,
+      "quantity": 2,
+      "thickness_mm": null,
+      "glass_type": null,
+      "hole_count": 0,
+      "hole_diameters_mm": [],
+      "notches_offcuts": 0,
+      "notch_sizes": [],
+      "_note": "Window left sash, 2 windows"
+    },
+    {
+      "panel_id": "P2",
+      "width_mm": 609.6,
+      "height_mm": 1219.2,
+      "quantity": 2,
+      "thickness_mm": null,
+      "glass_type": null,
+      "hole_count": 0,
+      "hole_diameters_mm": [],
+      "notches_offcuts": 0,
+      "notch_sizes": [],
+      "_note": "Window right sash, 2 windows"
+    },
+    {
+      "panel_id": "P3",
+      "width_mm": null,
+      "height_mm": null,
+      "quantity": 1,
+      "thickness_mm": null,
+      "glass_type": null,
+      "hole_count": 0,
+      "hole_diameters_mm": [],
+      "notches_offcuts": 0,
+      "notch_sizes": [],
+      "_note": "Door top glass. Door is 3.5 ft x 7 ft but glass size not written. Aluminium bottom panel is not glass and is excluded."
+    }
+  ]
+}
