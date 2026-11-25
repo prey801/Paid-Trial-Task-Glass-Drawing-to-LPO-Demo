@@ -40,8 +40,10 @@ def _run_one(img: Path, truth: Path, out: Path, attempts: int) -> dict | None:
             time.sleep(20)
             continue
         s = score(res.lpo.drawing, truth)
-        return {k: getattr(s, k) for k in KEYS} | {"total": s.total, "lpo": res.lpo.lpo_no,
-                                                   "details": s.details}
+        sp = score(res.lpo.drawing, truth, by_pieces=True)
+        return ({k: getattr(s, k) for k in KEYS} | {"total": s.total, "lpo": res.lpo.lpo_no,
+                                                    "details": s.details}
+                | {f"pieces_{k}": getattr(sp, k) for k in KEYS} | {"pieces_total": sp.total})
     return None
 
 
@@ -103,6 +105,12 @@ def main(argv=None) -> int:
     print(f"\nTOTAL (mean of runs): {T:.0f} fields   correct {_pct(tot['correct'], T)}   "
           f"safe {_pct(tot['correct'] + tot['flagged'], T)}   wrong {_pct(tot['wrong_confident'], T)}   "
           f"missing {_pct(tot['missing'], T)}")
+    pc = sum(statistics.mean(r["pieces_correct"] for r in rs) for rs in results.values() if rs)
+    pf = sum(statistics.mean(r["pieces_flagged"] for r in rs) for rs in results.values() if rs)
+    pw = sum(statistics.mean(r["pieces_wrong_confident"] for r in rs) for rs in results.values() if rs)
+    pt = sum(statistics.mean(r["pieces_total"] for r in rs) for rs in results.values() if rs)
+    print(f"BY PIECES (identical lines merged): {pt:.0f} fields   correct {_pct(pc, pt)}   "
+          f"safe {_pct(pc + pf, pt)}   wrong {_pct(pw, pt)}")
     if len(per_run_correct) > 1:
         print(f"correct % per run: {', '.join(f'{x:.0f}%' for x in per_run_correct)}")
     (out / "summary.json").write_text(json.dumps(

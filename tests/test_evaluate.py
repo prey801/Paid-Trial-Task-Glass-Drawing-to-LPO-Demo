@@ -139,3 +139,27 @@ def test_glass_type_scored_by_meaning(tmp_path):
     t = truth_file(tmp_path, [tpanel(glass_type="clear toughened")])
     s = score(Drawing(panels=[gpanel(glass_type=F("frosted toughened"))]), t)
     assert s.wrong_confident == 1
+
+
+def test_by_pieces_two_leaves_equal_one_line_qty_2(tmp_path):
+    t = truth_file(tmp_path, [tpanel("P1", w=None, h=None, thickness_mm=12),
+                              tpanel("P2", w=None, h=None, thickness_mm=12),
+                              tpanel("P3", w=750, h=970)])
+    got = Drawing(panels=[gpanel("P1", w=None, h=None, thickness_mm=F(12), quantity=F(2)),
+                          gpanel("P2", w=750, h=970)])
+    per_line = score(got, t)
+    assert per_line.wrong_confident >= 1 and any("MISSING panel" in d for d in per_line.details)
+    pieces = score(got, t, by_pieces=True)
+    assert pieces.wrong_confident == 0 and pieces.missing == 0
+    # and the other way round: output split into lines, truth one line x2
+    t2 = truth_file(tmp_path, [tpanel("P1", quantity=2)])
+    got2 = Drawing(panels=[gpanel("P1", quantity=F(1)), gpanel("P2", quantity=F(1))])
+    assert score(got2, t2).wrong_confident > 0
+    s2 = score(got2, t2, by_pieces=True)
+    assert s2.wrong_confident == 0 and s2.missing == 0
+
+
+def test_by_pieces_does_not_merge_different_panels(tmp_path):
+    t = truth_file(tmp_path, [tpanel("P1", w=900), tpanel("P2", w=800)])
+    got = Drawing(panels=[gpanel("P1", w=900), gpanel("P2", w=800)])
+    assert score(got, t, by_pieces=True).correct == score(got, t).correct

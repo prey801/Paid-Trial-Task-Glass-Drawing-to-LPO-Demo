@@ -85,6 +85,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.truth:
         from .evaluate import score, format_score
         print("\n" + format_score(score(res.lpo.drawing, Path(args.truth))))
+        print("\n" + format_score(score(res.lpo.drawing, Path(args.truth), by_pieces=True),
+                                  "Scored by pieces - identical lines merged"))
     return 0
 
 

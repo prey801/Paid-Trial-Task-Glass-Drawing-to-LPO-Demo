@@ -186,8 +186,68 @@ def _match_panels(drawing: Drawing, truth_panels: list[dict]) -> list[Optional[P
     return out
 
 
-def score(drawing: Drawing, truth_path: Path | str) -> Score:
+def _truth_key(tp: dict) -> tuple:
+    return (tp.get("width_mm"), tp.get("height_mm"), tp.get("thickness_mm"),
+            canonical_glass_type(tp.get("glass_type")) or tp.get("glass_type"),
+            tp.get("hole_count", 0), tuple(sorted(tp.get("hole_diameters_mm") or [])),
+            tp.get("notches_offcuts", 0), tuple(tp.get("notch_sizes") or []))
+
+
+def _panel_key(p: Panel) -> tuple:
+    f = lambda x: (x.value, x.clear)
+    gt = p.glass_type.value
+    return (f(p.width_mm), f(p.height_mm), f(p.thickness_mm),
+            canonical_glass_type(gt) or gt, p.glass_type.clear,
+            tuple(sorted((h.diameter_mm.value or -1, h.diameter_mm.clear) for h in p.holes)),
+            tuple((n.kind, n.size.value) for n in p.notches_offcuts))
+
+
+def merge_identical_truth(panels: list[dict]) -> list[dict]:
+    """Identical truth lines become one line with the quantities added
+    (two door leaves x1 == one line x2: the same glass order)."""
+    out: list[dict] = []
+    seen: dict[tuple, dict] = {}
+    for tp in panels:
+        q = tp.get("quantity", 1)
+        k = _truth_key(tp)
+        if q is not None and k in seen:
+            seen[k]["quantity"] = (seen[k].get("quantity", 1) or 0) + q
+            continue
+        tp = dict(tp)
+        out.append(tp)
+        if q is not None:
+            seen[k] = tp
+    return out
+
+
+def merge_identical_panels(drawing: Drawing) -> Drawing:
+    """Same as merge_identical_truth, for the extracted lines."""
+    d = drawing.model_copy(deep=True)
+    out: list[Panel] = []
+    seen: dict[tuple, Panel] = {}
+    for p in d.panels:
+        k = _panel_key(p)
+        q = p.quantity
+        if q.value is not None and k in seen:
+            m = seen[k].quantity
+            seen[k].quantity = Field(value=m.value + q.value, clear=m.clear and q.clear,
+                                     shown=m.shown or q.shown)
+            continue
+        out.append(p)
+        if q.value is not None:
+            seen[k] = p
+    d.panels = out
+    return d
+
+
+def score(drawing: Drawing, truth_path: Path | str, *, by_pieces: bool = False) -> Score:
+    """Score per field. by_pieces=True first merges identical lines on both
+    sides (adding their quantities), so 'P1 x1 + P2 x1' and 'P1 x2' - the same
+    glass order written two ways - score the same."""
     t = json.loads(Path(truth_path).read_text())
+    if by_pieces:
+        t["panels"] = merge_identical_truth(t["panels"])
+        drawing = merge_identical_panels(drawing)
     s = Score()
     _check(s, "overall width", drawing.overall_width_mm, t.get("overall_width_mm"))
     _check(s, "overall height", drawing.overall_height_mm, t.get("overall_height_mm"))
@@ -237,12 +297,12 @@ def score(drawing: Drawing, truth_path: Path | str) -> Score:
     return s
 
 
-def format_score(s: Score) -> str:
+def format_score(s: Score, title: str = "Accuracy vs ground truth") -> str:
     if not s.total:
         return "No fields to score."
     pct = lambda n: f"{100 * n / s.total:.0f}%"
     lines = [
-        f"Accuracy vs ground truth ({s.total} fields):",
+        f"{title} ({s.total} fields):",
         f"  correct & confident : {s.correct:>3} ({pct(s.correct)})",
         f"  flagged CHECK       : {s.flagged:>3} ({pct(s.flagged)})",
         f"  WRONG but confident : {s.wrong_confident:>3} ({pct(s.wrong_confident)})",
