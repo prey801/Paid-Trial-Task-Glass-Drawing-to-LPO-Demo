@@ -1,0 +1,145 @@
+{
+  "lpo_no": "LPO-20261125-014",
+  "date": "2026-11-25",
+  "source_image": "real_17_windows_and_door.jpg",
+  "drawing": {
+    "overall_width_mm": {
+      "value": null,
+      "clear": false,
+      "shown": false
+    },
+    "overall_height_mm": {
+      "value": null,
+      "clear": false,
+      "shown": false
+    },
+    "panels": [
+      {
+        "panel_id": "P1",
+        "width_mm": {
+          "value": 609.6,
+          "clear": true,
+          "shown": true
+        },
+        "height_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "quantity": {
+          "value": 2,
+          "clear": true,
+          "shown": true
+        },
+        "thickness_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "glass_type": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "holes": [],
+        "notches_offcuts": [],
+        "grooves_edgework": [],
+        "notes": "ID assigned (not written); height not written for this panel (overall dimension 1219.2 not used); Left panel of 2-panel window",
+        "extraction_issues": [],
+        "confidence": "Low",
+        "flags": [
+          "height not written (CHECK)",
+          "thickness not stated",
+          "units: sizes written in ft - each converted to mm using the unit written beside it"
+        ]
+      },
+      {
+        "panel_id": "P2",
+        "width_mm": {
+          "value": 609.6,
+          "clear": true,
+          "shown": true
+        },
+        "height_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "quantity": {
+          "value": 2,
+          "clear": true,
+          "shown": true
+        },
+        "thickness_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "glass_type": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "holes": [],
+        "notches_offcuts": [],
+        "grooves_edgework": [],
+        "notes": "ID assigned (not written); height not written for this panel (overall dimension 1219.2 not used); Right panel of 2-panel window",
+        "extraction_issues": [],
+        "confidence": "Low",
+        "flags": [
+          "height not written (CHECK)",
+          "thickness not stated",
+          "units: sizes written in ft - each converted to mm using the unit written beside it"
+        ]
+      },
+      {
+        "panel_id": "P3",
+        "width_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "height_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "quantity": {
+          "value": 1,
+          "clear": true,
+          "shown": true
+        },
+        "thickness_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "glass_type": {
+          "value": "glass",
+          "clear": true,
+          "shown": true
+        },
+        "holes": [],
+        "notches_offcuts": [],
+        "grooves_edgework": [],
+        "notes": "ID assigned (not written); width not written for this panel (overall dimension 1066.8 not used); Top panel of door marked 'glass'; bottom section marked 'Alum'. Overall door size 3.5 feet x 7 feet.",
+        "extraction_issues": [],
+        "confidence": "Low",
+        "flags": [
+          "width not written (CHECK)",
+          "height not written (CHECK)",
+          "thickness not stated",
+          "units: sizes written in ft - each converted to mm using the unit written beside it"
+        ]
+      }
+    ],
+    "general_notes": "Drawing shows 2 Windows (overall width 4 feet, height 4 feet, divided into two 2 feet panels) and 1 Door (width 3.5 feet, height 7 feet with upper glass panel and lower aluminum panel).",
+    "units_written": "mm",
+    "units_converted_from": "sizes written in ft - each converted to mm using the unit written beside it",
+    "model_used": "gemini-3.5-flash",
+    "extraction_issues": [],
+    "flags": [
+      "Units: sizes written in ft - each converted to mm using the unit written beside it - confirm"
+    ]
+  }
+}

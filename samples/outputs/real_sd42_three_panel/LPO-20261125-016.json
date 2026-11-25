@@ -1,0 +1,174 @@
+{
+  "lpo_no": "LPO-20261125-016",
+  "date": "2026-11-25",
+  "source_image": "real_sd42_three_panel.jpg",
+  "drawing": {
+    "overall_width_mm": {
+      "value": 2740.0,
+      "clear": true,
+      "shown": true
+    },
+    "overall_height_mm": {
+      "value": 1879.6,
+      "clear": false,
+      "shown": true
+    },
+    "panels": [
+      {
+        "panel_id": "P1",
+        "width_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "height_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "quantity": {
+          "value": 1,
+          "clear": true,
+          "shown": false
+        },
+        "thickness_mm": {
+          "value": 9.5,
+          "clear": false,
+          "shown": true
+        },
+        "glass_type": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "holes": [],
+        "notches_offcuts": [],
+        "grooves_edgework": [],
+        "notes": "thickness written \"3/8\" - read as inches = 9.5 mm (CHECK); ID assigned (not written); thickness written '3/8'; Left fixed panel",
+        "extraction_issues": [],
+        "confidence": "Low",
+        "flags": [
+          "width not written (CHECK)",
+          "height not written (CHECK)",
+          "qty not written - assumed 1",
+          "thickness 9.5 unclear (CHECK)",
+          "thickness 9.5 mm not standard",
+          "units: written in inch - sizes converted to mm (x25.4)",
+          "overall size not verified"
+        ]
+      },
+      {
+        "panel_id": "P2",
+        "width_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "height_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "quantity": {
+          "value": 1,
+          "clear": true,
+          "shown": false
+        },
+        "thickness_mm": {
+          "value": 9.5,
+          "clear": false,
+          "shown": true
+        },
+        "glass_type": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "holes": [],
+        "notches_offcuts": [
+          {
+            "kind": "transom",
+            "size": {
+              "value": "?x101.6",
+              "clear": false,
+              "shown": true
+            },
+            "position": {
+              "value": "top",
+              "clear": true,
+              "shown": true
+            },
+            "note": "Header / transom band height 4\" near top"
+          }
+        ],
+        "grooves_edgework": [],
+        "notes": "thickness written \"3/8\" - read as inches = 9.5 mm (CHECK); ID assigned (not written); thickness written '3/8'; Center panel with top header line",
+        "extraction_issues": [],
+        "confidence": "Low",
+        "flags": [
+          "width not written (CHECK)",
+          "height not written (CHECK)",
+          "qty not written - assumed 1",
+          "thickness 9.5 unclear (CHECK)",
+          "thickness 9.5 mm not standard",
+          "transom size '?x101.6' unclear (CHECK)",
+          "units: written in inch - sizes converted to mm (x25.4)",
+          "overall size not verified"
+        ]
+      },
+      {
+        "panel_id": "P3",
+        "width_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "height_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "quantity": {
+          "value": 1,
+          "clear": true,
+          "shown": false
+        },
+        "thickness_mm": {
+          "value": 9.5,
+          "clear": false,
+          "shown": true
+        },
+        "glass_type": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "holes": [],
+        "notches_offcuts": [],
+        "grooves_edgework": [],
+        "notes": "thickness written \"3/8\" - read as inches = 9.5 mm (CHECK); ID assigned (not written); thickness written '3/8'; Right panel with top header section and hardware cutouts",
+        "extraction_issues": [],
+        "confidence": "Low",
+        "flags": [
+          "width not written (CHECK)",
+          "height not written (CHECK)",
+          "qty not written - assumed 1",
+          "thickness 9.5 unclear (CHECK)",
+          "thickness 9.5 mm not standard",
+          "units: written in inch - sizes converted to mm (x25.4)",
+          "overall size not verified"
+        ]
+      }
+    ],
+    "general_notes": "overall height read 74, could be 14; Three-panel shower enclosure assembly. Overall dimensions: 107 7/8\" wide by 74\" high. Glass thickness marked 3/8\". Top header/transom dimensioned 4\" from top edge with mounting cutouts/clips shown.",
+    "units_written": "mm",
+    "units_converted_from": "written in inch - sizes converted to mm (x25.4)",
+    "model_used": "gemini-3.5-flash",
+    "extraction_issues": [],
+    "flags": [
+      "Units: written in inch - sizes converted to mm (x25.4) - confirm",
+      "Overall height 1879.6 unclear (CHECK)",
+      "Overall size not verified: some panel sizes missing"
+    ]
+  }
+}

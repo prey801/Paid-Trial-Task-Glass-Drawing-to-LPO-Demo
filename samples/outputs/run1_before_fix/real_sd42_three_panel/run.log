@@ -1,0 +1,48 @@
+[extract] gemini-3.5-flash: attempt 1/2 (timeout 75s)
+[extract] gemini-3.5-flash: read OK in 43s
+
+LPO LPO-20261125-012  (2026-11-25)  from real_sd42_three_panel.jpg
+Read by: gemini-3.5-flash   Units written: inch
+Enhancement: downscaled input to 1500x2000 for processing; perspective corrected (paper quad found) -> 1504x1906; denoised (non-local means on L, h=5.8); flattened uneven lighting (background division); contrast: CLAHE on L channel + ink/paper levels; resized x1.57 -> 2367x3000; sharpened (unsharp mask, sigma=1.5)
+Overall: 107.875 x 14 (CHECK) mm
+Panel                W             H   Qty  Holes  Conf.   Check
+P1               CHECK         CHECK     1      0  Low     Y
+P2               CHECK         CHECK     1      0  Low     Y
+P3               CHECK         CHECK     1      0  Low     Y
+Total area 0 m² (includes 3 CHECK lines)   Total holes: 0
+
+NEEDS HUMAN CHECK (15):
+  - Drawing: Units written in inch - values NOT converted (CHECK)
+  - Drawing: Overall height 14 unclear (CHECK)
+  - Drawing: Overall size not verified: some panel sizes missing
+  - Drawing: Qty not written - assumed 1 per panel (all panels)
+  - P1: width not written (CHECK)
+  - P1: height not written (CHECK)
+  - P1: thickness 0.375 mm not standard
+  - P2: width not written (CHECK)
+  - P2: height not written (CHECK)
+  - P2: thickness 0.375 mm not standard
+  - P2: hinge cutout size not given (CHECK)
+  - P3: width not written (CHECK)
+  - P3: height not written (CHECK)
+  - P3: thickness 0.375 mm not standard
+  - P3: hinge cutout size not given (CHECK)
+
+Outputs in outputs/LPO-20261125-012/:
+  LPO-20261125-012.xlsx
+  LPO-20261125-012.pdf
+  enhanced.png
+  LPO-20261125-012.json
+
+Accuracy vs ground truth (11 fields):
+  correct & confident :   4 (36%)
+  flagged CHECK       :   1 (9%)
+  WRONG but confident :   6 (55%)
+  missing             :   0 (0%)
+  WRONG   overall width: got 107.875, expected 2740.0
+  CHECK   overall height: got 14.0, expected none
+  WRONG   P1 thickness: got 0.375, expected none (not on drawing)
+  WRONG   P2 thickness: got 0.375, expected none (not on drawing)
+  WRONG   P2 notches/offcuts: got 2, expected 0
+  WRONG   P3 thickness: got 0.375, expected none (not on drawing)
+  WRONG   P3 notches/offcuts: got 2, expected 0

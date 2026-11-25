@@ -1,0 +1,215 @@
+{
+  "lpo_no": "LPO-20261125-012",
+  "date": "2026-11-25",
+  "source_image": "real_sd42_three_panel.jpg",
+  "drawing": {
+    "overall_width_mm": {
+      "value": 107.875,
+      "clear": true,
+      "shown": true
+    },
+    "overall_height_mm": {
+      "value": 14.0,
+      "clear": false,
+      "shown": true
+    },
+    "panels": [
+      {
+        "panel_id": "P1",
+        "width_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "height_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "quantity": {
+          "value": 1,
+          "clear": true,
+          "shown": false
+        },
+        "thickness_mm": {
+          "value": 0.375,
+          "clear": true,
+          "shown": true
+        },
+        "glass_type": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "holes": [],
+        "notches_offcuts": [],
+        "grooves_edgework": [],
+        "notes": "ID assigned (not written)",
+        "extraction_issues": [],
+        "confidence": "Low",
+        "flags": [
+          "width not written (CHECK)",
+          "height not written (CHECK)",
+          "qty not written - assumed 1",
+          "thickness 0.375 mm not standard",
+          "units inch - not converted (CHECK)",
+          "overall size not verified"
+        ]
+      },
+      {
+        "panel_id": "P2",
+        "width_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "height_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "quantity": {
+          "value": 1,
+          "clear": true,
+          "shown": false
+        },
+        "thickness_mm": {
+          "value": 0.375,
+          "clear": true,
+          "shown": true
+        },
+        "glass_type": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "holes": [],
+        "notches_offcuts": [
+          {
+            "kind": "hinge cutout",
+            "size": {
+              "value": null,
+              "clear": false,
+              "shown": false
+            },
+            "position": {
+              "value": "4\" from top",
+              "clear": true,
+              "shown": true
+            },
+            "note": "Hinge cutout on left edge, 4\" from top edge"
+          },
+          {
+            "kind": "hinge cutout",
+            "size": {
+              "value": null,
+              "clear": false,
+              "shown": false
+            },
+            "position": {
+              "value": "4\" from top",
+              "clear": true,
+              "shown": true
+            },
+            "note": "Hinge cutout on right edge (shared with P3), 4\" from top edge"
+          }
+        ],
+        "grooves_edgework": [],
+        "notes": "ID assigned (not written)",
+        "extraction_issues": [],
+        "confidence": "Low",
+        "flags": [
+          "width not written (CHECK)",
+          "height not written (CHECK)",
+          "qty not written - assumed 1",
+          "thickness 0.375 mm not standard",
+          "hinge cutout size not given (CHECK)",
+          "units inch - not converted (CHECK)",
+          "overall size not verified"
+        ]
+      },
+      {
+        "panel_id": "P3",
+        "width_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "height_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "quantity": {
+          "value": 1,
+          "clear": true,
+          "shown": false
+        },
+        "thickness_mm": {
+          "value": 0.375,
+          "clear": true,
+          "shown": true
+        },
+        "glass_type": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "holes": [],
+        "notches_offcuts": [
+          {
+            "kind": "hinge cutout",
+            "size": {
+              "value": null,
+              "clear": false,
+              "shown": false
+            },
+            "position": {
+              "value": "4\" from top",
+              "clear": true,
+              "shown": true
+            },
+            "note": "Hinge cutout on left edge (shared with P2), 4\" from top edge"
+          },
+          {
+            "kind": "hinge cutout",
+            "size": {
+              "value": null,
+              "clear": false,
+              "shown": false
+            },
+            "position": {
+              "value": "4\" from top",
+              "clear": true,
+              "shown": true
+            },
+            "note": "Hinge cutout on right edge, 4\" from top edge"
+          }
+        ],
+        "grooves_edgework": [],
+        "notes": "ID assigned (not written)",
+        "extraction_issues": [],
+        "confidence": "Low",
+        "flags": [
+          "width not written (CHECK)",
+          "height not written (CHECK)",
+          "qty not written - assumed 1",
+          "thickness 0.375 mm not standard",
+          "hinge cutout size not given (CHECK)",
+          "units inch - not converted (CHECK)",
+          "overall size not verified"
+        ]
+      }
+    ],
+    "general_notes": "overall height read 14, could be 74 or 4; Assembly of 3 panels with total width 107 7/8 inches and height 14 inches (height is unclear, could be 74 or 4). Glass thickness 3/8\" is indicated on the right side. Hinge cutouts are located along a reference line 4\" from the top edge on panels P2 and P3.",
+    "units_written": "inch",
+    "units_converted_from": "",
+    "model_used": "gemini-3.5-flash",
+    "extraction_issues": [],
+    "flags": [
+      "Units written in inch - values NOT converted (CHECK)",
+      "Overall height 14 unclear (CHECK)",
+      "Overall size not verified: some panel sizes missing"
+    ]
+  }
+}

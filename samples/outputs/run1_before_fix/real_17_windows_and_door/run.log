@@ -1,0 +1,43 @@
+[extract] gemini-3.5-flash: attempt 1/2 (timeout 75s)
+[extract] gemini-3.5-flash: 503 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'Thi - retrying once
+[extract] gemini-3.5-flash: attempt 2/2 (timeout 75s)
+[extract] gemini-3.5-flash: read OK in 26s
+
+LPO LPO-20261125-011  (2026-11-25)  from real_17_windows_and_door.jpg
+Read by: gemini-3.5-flash   Units written: unknown
+Enhancement: skipped perspective: no paper outline found; deskewed by -7.5 deg (line angle); denoised (non-local means on L, h=3.0); flattened uneven lighting (background division); contrast: CLAHE on L channel + ink/paper levels; resized x2.00 -> 900x1122; sharpened (unsharp mask, sigma=1.5)
+Panel                W             H   Qty  Holes  Conf.   Check
+P1           2 (CHECK)         CHECK     2      0  Low     Y
+P2           2 (CHECK)         CHECK     2      0  Low     Y
+Doors            CHECK         CHECK     1      0  Low     Y
+Total area 0 m² (includes 3 CHECK lines)   Total holes: 0
+
+NEEDS HUMAN CHECK (10):
+  - Drawing: Units written in unknown - values NOT converted (CHECK)
+  - Drawing: Thickness not stated - confirm with client (all panels)
+  - P1: width 2 unclear (CHECK)
+  - P1: height not written (CHECK)
+  - P1: width 2 mm outside 50-6000
+  - P2: width 2 unclear (CHECK)
+  - P2: height not written (CHECK)
+  - P2: width 2 mm outside 50-6000
+  - Doors: width not written (CHECK)
+  - Doors: height not written (CHECK)
+
+Outputs in outputs/LPO-20261125-011/:
+  LPO-20261125-011.xlsx
+  LPO-20261125-011.pdf
+  enhanced.png
+  LPO-20261125-011.json
+
+Accuracy vs ground truth (15 fields):
+  correct & confident :   9 (60%)
+  flagged CHECK       :   2 (13%)
+  WRONG but confident :   0 (0%)
+  missing             :   4 (27%)
+  MISSING overall width: expected 1219.2
+  MISSING overall height: expected 1219.2
+  CHECK   P1 width: got 2.0 (wrong), expected 609.6
+  MISSING P1 height: expected 1219.2
+  CHECK   P2 width: got 2.0 (wrong), expected 609.6
+  MISSING P2 height: expected 1219.2

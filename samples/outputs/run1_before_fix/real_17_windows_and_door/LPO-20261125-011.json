@@ -1,0 +1,149 @@
+{
+  "lpo_no": "LPO-20261125-011",
+  "date": "2026-11-25",
+  "source_image": "real_17_windows_and_door.jpg",
+  "drawing": {
+    "overall_width_mm": {
+      "value": null,
+      "clear": false,
+      "shown": false
+    },
+    "overall_height_mm": {
+      "value": null,
+      "clear": false,
+      "shown": false
+    },
+    "panels": [
+      {
+        "panel_id": "P1",
+        "width_mm": {
+          "value": 2.0,
+          "clear": false,
+          "shown": true
+        },
+        "height_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "quantity": {
+          "value": 2,
+          "clear": true,
+          "shown": true
+        },
+        "thickness_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "glass_type": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "holes": [],
+        "notches_offcuts": [],
+        "grooves_edgework": [],
+        "notes": "ID assigned (not written); width read 2, could be 2 ft; height not written for this panel (overall dimension 4 not used); Left glass panel of 2-pane window frame (labelled Windows Qty 2).",
+        "extraction_issues": [],
+        "confidence": "Low",
+        "flags": [
+          "width 2 unclear (CHECK)",
+          "height not written (CHECK)",
+          "width 2 mm outside 50-6000",
+          "thickness not stated",
+          "units unknown - not converted (CHECK)"
+        ]
+      },
+      {
+        "panel_id": "P2",
+        "width_mm": {
+          "value": 2.0,
+          "clear": false,
+          "shown": true
+        },
+        "height_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "quantity": {
+          "value": 2,
+          "clear": true,
+          "shown": true
+        },
+        "thickness_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "glass_type": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "holes": [],
+        "notches_offcuts": [],
+        "grooves_edgework": [],
+        "notes": "ID assigned (not written); width read 2, could be 2 ft; height not written for this panel (overall dimension 4 not used); Right glass panel of 2-pane window frame (labelled Windows Qty 2).",
+        "extraction_issues": [],
+        "confidence": "Low",
+        "flags": [
+          "width 2 unclear (CHECK)",
+          "height not written (CHECK)",
+          "width 2 mm outside 50-6000",
+          "thickness not stated",
+          "units unknown - not converted (CHECK)"
+        ]
+      },
+      {
+        "panel_id": "Doors",
+        "width_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "height_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "quantity": {
+          "value": 1,
+          "clear": true,
+          "shown": true
+        },
+        "thickness_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "glass_type": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "holes": [],
+        "notches_offcuts": [],
+        "grooves_edgework": [],
+        "notes": "width not written for this panel (overall dimension 3.5 not used); height not written for this panel (overall dimension 7 not used); Door assembly with overall dimensions 3.5 ft x 7 ft. Top panel marked 'glass', bottom panel marked 'Alum'.",
+        "extraction_issues": [],
+        "confidence": "Low",
+        "flags": [
+          "width not written (CHECK)",
+          "height not written (CHECK)",
+          "thickness not stated",
+          "units unknown - not converted (CHECK)"
+        ]
+      }
+    ],
+    "general_notes": "Drawing contains two main assemblies: 2 sets of windows measuring 4 ft width x 4 ft height overall (each composed of two 2 ft wide panels), and 1 door unit measuring 3.5 ft width x 7 ft height overall.",
+    "units_written": "unknown",
+    "units_converted_from": "",
+    "model_used": "gemini-3.5-flash",
+    "extraction_issues": [],
+    "flags": [
+      "Units written in unknown - values NOT converted (CHECK)"
+    ]
+  }
+}

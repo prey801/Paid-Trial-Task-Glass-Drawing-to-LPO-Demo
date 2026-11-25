@@ -1,0 +1,33 @@
+[extract] gemini-3.5-flash: attempt 1/2 (timeout 75s)
+[extract] gemini-3.5-flash: read OK in 15s
+
+LPO LPO-20261125-013  (2026-11-25)  from real_16_door_and_window.jpg
+Read by: gemini-3.5-flash   Units written: mm
+Enhancement: perspective corrected (paper quad found) -> 689x413; denoised (non-local means on L, h=3.0); flattened uneven lighting (background division); contrast: CLAHE on L channel + ink/paper levels; resized x2.00 -> 1378x826; sharpened (unsharp mask, sigma=1.5)
+Overall: 2950 x 2400 mm
+Panel                W             H   Qty  Holes  Conf.   Check
+P1               CHECK         CHECK     2      0  Low     Y
+sliding window           750           970     1      0  Medium  Y
+Total area 0.728 m² (includes 1 CHECK line)   Total holes: 0
+
+NEEDS HUMAN CHECK (6):
+  - Drawing: Units: sizes written in cm and m - each converted to mm using the unit written beside it - confirm
+  - Drawing: Overall size not verified: some panel sizes missing
+  - Drawing: Qty not written - assumed 1 per panel (sliding window)
+  - P1: width not written (CHECK)
+  - P1: height not written (CHECK)
+  - sliding window: thickness not stated
+
+Outputs in outputs/LPO-20261125-013/:
+  LPO-20261125-013.xlsx
+  LPO-20261125-013.pdf
+  enhanced.png
+  LPO-20261125-013.json
+
+Accuracy vs ground truth (11 fields):
+  correct & confident :   9 (82%)
+  flagged CHECK       :   0 (0%)
+  WRONG but confident :   1 (9%)
+  missing             :   1 (9%)
+  WRONG   P1 qty: got 2, expected 1
+  MISSING panel P2

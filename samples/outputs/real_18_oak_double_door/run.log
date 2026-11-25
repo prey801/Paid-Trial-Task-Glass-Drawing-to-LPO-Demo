@@ -1,0 +1,37 @@
+[extract] gemini-3.5-flash: attempt 1/2 (timeout 75s)
+[extract] gemini-3.5-flash: read OK in 42s
+
+LPO LPO-20261125-015  (2026-11-25)  from real_18_oak_double_door.jpg
+Read by: gemini-3.5-flash   Units written: mm
+Enhancement: skipped perspective: no paper outline found; skipped deskew: no significant skew detected; denoised (non-local means on L, h=5.8); flattened uneven lighting (background division); contrast: CLAHE on L channel + ink/paper levels; resized x2.00 -> 786x1016; sharpened (unsharp mask, sigma=1.5)
+Overall: 1187 x 2050 mm
+Panel                W             H   Qty  Holes  Conf.   Check
+P1               CHECK         CHECK     1      0  Low     Y
+P2               CHECK         CHECK     1      0  Low     Y
+Total area 0 m² (includes 2 CHECK lines)   Total holes: 0
+
+NEEDS HUMAN CHECK (10):
+  - Drawing: Overall size not verified: some panel sizes missing
+  - Drawing: Qty not written - assumed 1 per panel (all panels)
+  - P1: width not written (CHECK)
+  - P1: height not written (CHECK)
+  - P1: thickness 14 mm not standard
+  - P1: glass type 'UNIT' not recognised - confirm
+  - P2: width not written (CHECK)
+  - P2: height not written (CHECK)
+  - P2: thickness 14 mm not standard
+  - P2: glass type 'UNIT' not recognised - confirm
+
+Outputs in outputs/LPO-20261125-015/:
+  LPO-20261125-015.xlsx
+  LPO-20261125-015.pdf
+  enhanced.png
+  LPO-20261125-015.json
+
+Accuracy vs ground truth (10 fields):
+  correct & confident :   8 (80%)
+  flagged CHECK       :   0 (0%)
+  WRONG but confident :   2 (20%)
+  missing             :   0 (0%)
+  WRONG   P1 glass type: got UNIT, expected 14mm unit (double glazed)
+  WRONG   P2 glass type: got UNIT, expected 14mm unit (double glazed)

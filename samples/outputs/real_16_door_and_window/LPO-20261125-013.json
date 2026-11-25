@@ -1,0 +1,108 @@
+{
+  "lpo_no": "LPO-20261125-013",
+  "date": "2026-11-25",
+  "source_image": "real_16_door_and_window.jpg",
+  "drawing": {
+    "overall_width_mm": {
+      "value": 2950.0,
+      "clear": true,
+      "shown": true
+    },
+    "overall_height_mm": {
+      "value": 2400.0,
+      "clear": true,
+      "shown": true
+    },
+    "panels": [
+      {
+        "panel_id": "P1",
+        "width_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "height_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "quantity": {
+          "value": 2,
+          "clear": true,
+          "shown": true
+        },
+        "thickness_mm": {
+          "value": 12.0,
+          "clear": true,
+          "shown": true
+        },
+        "glass_type": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "holes": [],
+        "notches_offcuts": [],
+        "grooves_edgework": [],
+        "notes": "ID assigned (not written); 2 doors shown within overall frame structure measuring 2.95m x 2.4m",
+        "extraction_issues": [],
+        "confidence": "Low",
+        "flags": [
+          "width not written (CHECK)",
+          "height not written (CHECK)",
+          "units: sizes written in cm and m - each converted to mm using the unit written beside it",
+          "overall size not verified"
+        ]
+      },
+      {
+        "panel_id": "sliding window",
+        "width_mm": {
+          "value": 750.0,
+          "clear": true,
+          "shown": true
+        },
+        "height_mm": {
+          "value": 970.0,
+          "clear": true,
+          "shown": true
+        },
+        "quantity": {
+          "value": 1,
+          "clear": true,
+          "shown": false
+        },
+        "thickness_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "glass_type": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "holes": [],
+        "notches_offcuts": [],
+        "grooves_edgework": [],
+        "notes": "",
+        "extraction_issues": [],
+        "confidence": "Medium",
+        "flags": [
+          "qty not written - assumed 1",
+          "thickness not stated",
+          "units: sizes written in cm and m - each converted to mm using the unit written beside it",
+          "overall size not verified"
+        ]
+      }
+    ],
+    "general_notes": "",
+    "units_written": "mm",
+    "units_converted_from": "sizes written in cm and m - each converted to mm using the unit written beside it",
+    "model_used": "gemini-3.5-flash",
+    "extraction_issues": [],
+    "flags": [
+      "Units: sizes written in cm and m - each converted to mm using the unit written beside it - confirm",
+      "Overall size not verified: some panel sizes missing"
+    ]
+  }
+}

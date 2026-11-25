@@ -1,0 +1,108 @@
+{
+  "lpo_no": "LPO-20261125-010",
+  "date": "2026-11-25",
+  "source_image": "real_16_door_and_window.jpg",
+  "drawing": {
+    "overall_width_mm": {
+      "value": 2950.0,
+      "clear": true,
+      "shown": true
+    },
+    "overall_height_mm": {
+      "value": 2400.0,
+      "clear": true,
+      "shown": true
+    },
+    "panels": [
+      {
+        "panel_id": "P1",
+        "width_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "height_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "quantity": {
+          "value": 2,
+          "clear": true,
+          "shown": true
+        },
+        "thickness_mm": {
+          "value": 12.0,
+          "clear": true,
+          "shown": true
+        },
+        "glass_type": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "holes": [],
+        "notches_offcuts": [],
+        "grooves_edgework": [],
+        "notes": "ID assigned (not written); 12mm, 2 doors structure within 2.95m x 2.4m overall frame",
+        "extraction_issues": [],
+        "confidence": "Low",
+        "flags": [
+          "width not written (CHECK)",
+          "height not written (CHECK)",
+          "units unknown - not converted (CHECK)",
+          "overall size not verified"
+        ]
+      },
+      {
+        "panel_id": "P2",
+        "width_mm": {
+          "value": 750.0,
+          "clear": true,
+          "shown": true
+        },
+        "height_mm": {
+          "value": 970.0,
+          "clear": true,
+          "shown": true
+        },
+        "quantity": {
+          "value": 1,
+          "clear": true,
+          "shown": false
+        },
+        "thickness_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "glass_type": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "holes": [],
+        "notches_offcuts": [],
+        "grooves_edgework": [],
+        "notes": "ID assigned (not written); sliding window",
+        "extraction_issues": [],
+        "confidence": "Low",
+        "flags": [
+          "qty not written - assumed 1",
+          "thickness not stated",
+          "units unknown - not converted (CHECK)",
+          "overall size not verified"
+        ]
+      }
+    ],
+    "general_notes": "Drawing consists of a main glass door assembly with overall dimensions 2.95m wide by 2.4m high (specified 12mm, 2 doors), and a separate sliding window measuring 75cm wide by 97cm high.",
+    "units_written": "unknown",
+    "units_converted_from": "",
+    "model_used": "gemini-3.5-flash",
+    "extraction_issues": [],
+    "flags": [
+      "Units written in unknown - values NOT converted (CHECK)",
+      "Overall size not verified: some panel sizes missing"
+    ]
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "lpo_no": "LPO-20261125-015",
+  "date": "2026-11-25",
+  "source_image": "real_18_oak_double_door.jpg",
+  "drawing": {
+    "overall_width_mm": {
+      "value": 1187.0,
+      "clear": true,
+      "shown": true
+    },
+    "overall_height_mm": {
+      "value": 2050.0,
+      "clear": true,
+      "shown": true
+    },
+    "panels": [
+      {
+        "panel_id": "P1",
+        "width_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "height_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "quantity": {
+          "value": 1,
+          "clear": true,
+          "shown": false
+        },
+        "thickness_mm": {
+          "value": 14.0,
+          "clear": true,
+          "shown": true
+        },
+        "glass_type": {
+          "value": "UNIT",
+          "clear": true,
+          "shown": true
+        },
+        "holes": [],
+        "notches_offcuts": [],
+        "grooves_edgework": [
+          {
+            "kind": "bevel",
+            "size": {
+              "value": null,
+              "clear": false,
+              "shown": false
+            },
+            "position": {
+              "value": "Bevel",
+              "clear": true,
+              "shown": true
+            },
+            "note": ""
+          }
+        ],
+        "notes": "ID assigned (not written)",
+        "extraction_issues": [],
+        "confidence": "Low",
+        "flags": [
+          "width not written (CHECK)",
+          "height not written (CHECK)",
+          "qty not written - assumed 1",
+          "thickness 14 mm not standard",
+          "glass type 'UNIT' not recognised - confirm",
+          "overall size not verified"
+        ]
+      },
+      {
+        "panel_id": "P2",
+        "width_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "height_mm": {
+          "value": null,
+          "clear": false,
+          "shown": false
+        },
+        "quantity": {
+          "value": 1,
+          "clear": true,
+          "shown": false
+        },
+        "thickness_mm": {
+          "value": 14.0,
+          "clear": true,
+          "shown": true
+        },
+        "glass_type": {
+          "value": "UNIT",
+          "clear": true,
+          "shown": true
+        },
+        "holes": [],
+        "notches_offcuts": [],
+        "grooves_edgework": [
+          {
+            "kind": "bevel",
+            "size": {
+              "value": null,
+              "clear": false,
+              "shown": false
+            },
+            "position": {
+              "value": "Bevel",
+              "clear": true,
+              "shown": true
+            },
+            "note": ""
+          }
+        ],
+        "notes": "ID assigned (not written)",
+        "extraction_issues": [],
+        "confidence": "Low",
+        "flags": [
+          "width not written (CHECK)",
+          "height not written (CHECK)",
+          "qty not written - assumed 1",
+          "thickness 14 mm not standard",
+          "glass type 'UNIT' not recognised - confirm",
+          "overall size not verified"
+        ]
+      }
+    ],
+    "general_notes": "SOLID EUROPEAN OAK. WEDGE MORTICE + TENON JOINTS. SCALE 1:1.",
+    "units_written": "mm",
+    "units_converted_from": "",
+    "model_used": "gemini-3.5-flash",
+    "extraction_issues": [],
+    "flags": [
+      "Overall size not verified: some panel sizes missing"
+    ]
+  }
+}

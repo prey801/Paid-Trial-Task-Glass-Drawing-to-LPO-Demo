@@ -55,6 +55,10 @@ Each run writes to `outputs/<LPO number>/`:
 
 The LPO number is allocated only after a successful extraction, so a failed run does not use up a number.
 
+## Results on the real client drawings
+
+See [`samples/RESULTS.md`](samples/RESULTS.md): the four handwritten phone photos, their ground truth, the Excel and PDF outputs, and accuracy before and after fixing the unit handling they exposed.
+
 ## How it works
 
 | Stage | File | What it does |
@@ -80,9 +84,10 @@ The LPO number is allocated only after a successful extraction, so a failed run 
 - **Units** (`glass_lpo/units.py`):
   - **No unit written:** assumed to be **cm** (local drawings write "90 × 210" for a 900 × 2100 mm door) and converted to mm.
   - **Safety rule:** if converting would push sizes past the 6000 mm sheet limit while the numbers as written are sensible mm (e.g. "900 × 2100"), they are kept as mm instead.
-  - **cm or m written:** converted to mm.
-  - **Inches or an unknown unit:** not converted, and every size is marked `CHECK`.
-  - **Thickness:** always treated as mm.
+  - **cm, m, inches or feet written:** converted to mm. Fractions (`107 7/8`, `3⅜`) and feet-and-inches (`4'6"`) are read from the text.
+  - **Mixed units** ("2.95m" beside "75cm"): the unit written beside each number is used for that number. A number with no unit on a mixed drawing is marked `CHECK`.
+  - **Unknown unit:** not converted, and every size is marked `CHECK`.
+  - **Thickness:** treated as mm, except a fraction or inch thickness (e.g. "3/8"), which is converted and marked `CHECK`.
   - Any assumption about units is flagged.
 - Glass type must be a recognised type, so a drawing title is not mistaken for one.
 - Unwritten quantities are assumed to be 1, and that assumption is flagged.

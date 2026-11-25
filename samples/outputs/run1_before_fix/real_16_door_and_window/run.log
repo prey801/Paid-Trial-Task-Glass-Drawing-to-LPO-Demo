@@ -1,0 +1,36 @@
+[extract] gemini-3.5-flash: attempt 1/2 (timeout 75s)
+[extract] gemini-3.5-flash: read OK in 24s
+
+LPO LPO-20261125-010  (2026-11-25)  from real_16_door_and_window.jpg
+Read by: gemini-3.5-flash   Units written: unknown
+Enhancement: perspective corrected (paper quad found) -> 689x413; denoised (non-local means on L, h=3.0); flattened uneven lighting (background division); contrast: CLAHE on L channel + ink/paper levels; resized x2.00 -> 1378x826; sharpened (unsharp mask, sigma=1.5)
+Overall: 2950 x 2400 mm
+Panel                W             H   Qty  Holes  Conf.   Check
+P1               CHECK         CHECK     2      0  Low     Y
+P2                 750           970     1      0  Low     Y
+Total area 0.728 m² (includes 1 CHECK line)   Total holes: 0
+
+NEEDS HUMAN CHECK (6):
+  - Drawing: Units written in unknown - values NOT converted (CHECK)
+  - Drawing: Overall size not verified: some panel sizes missing
+  - Drawing: Qty not written - assumed 1 per panel (P2)
+  - P1: width not written (CHECK)
+  - P1: height not written (CHECK)
+  - P2: thickness not stated
+
+Outputs in outputs/LPO-20261125-010/:
+  LPO-20261125-010.xlsx
+  LPO-20261125-010.pdf
+  enhanced.png
+  LPO-20261125-010.json
+
+Accuracy vs ground truth (14 fields):
+  correct & confident :   7 (50%)
+  flagged CHECK       :   0 (0%)
+  WRONG but confident :   3 (21%)
+  missing             :   4 (29%)
+  WRONG   P1 qty: got 2, expected 1
+  WRONG   P2 width: got 750.0, expected none (not on drawing)
+  WRONG   P2 height: got 970.0, expected none (not on drawing)
+  MISSING P2 thickness: expected 12
+  MISSING panel P3
