@@ -36,6 +36,7 @@ from .units import UNIT_TO_MM, has_fraction, parse_length, units_in_text
 # Fallback order, first model tried first. 3.5-flash leads because it has been
 # the most reliable (3.8/3.7 are often 503-busy or rate-limited).
 DEFAULT_MODEL = "gemini-3.5-flash,gemini-3.8-flash,gemini-3.7-flash,gemini-3.5-flash-lite"
+MIN_CALL_TIMEOUT_S = 10.0
 DEFAULT_DEADLINE_S = 150.0   # whole extraction, all models (env GEMINI_DEADLINE_S)
 DEFAULT_CALL_TIMEOUT_S = 75.0  # one API call (env GEMINI_CALL_TIMEOUT_S)
 
@@ -811,7 +812,7 @@ def _read_with_fallback(client, models: list[str], contents: list,
     for m in models:
         for attempt in (1, 2):
             left = deadline_s - (_clock() - start)
-            if left < 5:
+            if left < MIN_CALL_TIMEOUT_S:  # Gemini rejects deadlines under 10 s (400)
                 print(f"[extract] deadline of {deadline_s:.0f}s reached, giving up", flush=True)
                 raise ExtractionError(
                     f"Gemini extraction gave up after {deadline_s:.0f}s:\n  " + "\n  ".join(errors or ["(no attempts)"])
