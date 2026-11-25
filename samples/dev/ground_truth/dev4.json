@@ -1,0 +1,20 @@
+{
+  "_status": "Written before any system run. dev1 unit confirmed by Brian (feet); others read as written.",
+  "_reading": "'window', hatched, blurry photo. Top '1M' (1000 mm), side '150cm' (1500 mm). Mixed m and cm. Hatching has no words, so no glass type.",
+  "overall_width_mm": 1000,
+  "overall_height_mm": 1500,
+  "panels": [
+    {
+      "panel_id": "P1",
+      "width_mm": 1000,
+      "height_mm": 1500,
+      "quantity": 1,
+      "thickness_mm": null,
+      "glass_type": null,
+      "hole_count": 0,
+      "hole_diameters_mm": [],
+      "notches_offcuts": 0,
+      "notch_sizes": []
+    }
+  ]
+}

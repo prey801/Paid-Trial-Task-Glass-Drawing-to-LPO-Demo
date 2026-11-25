@@ -1,0 +1,20 @@
+{
+  "_status": "Written before any system run. dev1 unit confirmed by Brian (feet); others read as written.",
+  "_reading": "Single panel, photo at an angle. Bottom '9 Fet' (9 ft = 2743.2 mm), side '45cm' (450 mm). Mixed feet and cm.",
+  "overall_width_mm": 2743.2,
+  "overall_height_mm": 450,
+  "panels": [
+    {
+      "panel_id": "P1",
+      "width_mm": 2743.2,
+      "height_mm": 450,
+      "quantity": 1,
+      "thickness_mm": null,
+      "glass_type": null,
+      "hole_count": 0,
+      "hole_diameters_mm": [],
+      "notches_offcuts": 0,
+      "notch_sizes": []
+    }
+  ]
+}
