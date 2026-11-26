@@ -31,7 +31,7 @@ from pydantic import BaseModel, ValidationError
 from pydantic import Field as PydField
 
 from .schema import Drawing, Feature, Field, Hole, Panel
-from .units import UNIT_TO_MM, has_fraction, parse_length, units_in_text
+from .units import FEET_ASSUMED, UNIT_TO_MM, has_fraction, only_feet_plausible, parse_length, units_in_text
 
 # Fallback order, first model tried first. 3.5-flash leads because it has been
 # the most reliable (3.8/3.7 are often 503-busy or rate-limited).
@@ -430,6 +430,12 @@ def _apply_written_units(wire: WireDrawing, notes_by_panel: dict[int, list[str]]
         if unit == "none":
             fr = [w.raw_text.strip() for _, w, _ in dims if has_fraction(w.raw_text)]
             if fr:  # metric sizes are not written as fractions: feet or inches, but which?
+                written = [(w, num if num is not None else w.value) for _, w, _, num in unitless]
+                if only_feet_plausible([v for _, v in written]):
+                    for w, v in written:
+                        _to_mm(w, v, "ft")
+                        w.legible = "unclear"
+                    return "mm", FEET_ASSUMED, []
                 for _, w, _ in dims:
                     if w.value is not None:
                         w.legible = "unclear"

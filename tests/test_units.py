@@ -179,14 +179,35 @@ def test_mm_thickness_untouched():
     assert d.panels[0].thickness_mm.value == 12 and d.panels[0].thickness_mm.clear
 
 
-def test_no_unit_too_small_as_cm_is_check_not_converted():
-    # "7" x "10.8" with no unit: as cm a 70 x 108 mm window - not believable.
+def test_no_unit_too_small_as_cm_read_as_feet_and_checked():
+    # "7" x "10.8" with no unit: as cm 70 x 108 mm, as inches 178 x 274 mm -
+    # neither is believable glass; as feet 2134 x 3292 mm is. Convert, but CHECK.
     d = validate(wire_to_drawing({"units_written": "none written",
                                   "panels": [wpanel(n("7", 7), n("10.8", 10.8))]}))
     p = d.panels[0]
-    assert (p.width_mm.value, p.height_mm.value) == (7, 10.8)
+    assert (p.width_mm.value, p.height_mm.value) == (2133.6, 3291.8)
     assert not p.width_mm.clear and not p.height_mm.clear
+    assert any("read as feet" in f for f in d.flags)
+
+
+def test_no_unit_too_small_and_not_feet_either_left_as_written():
+    # "0.1" x "7": as feet 30 mm is below any glass size -> unit unknown, not converted.
+    d = validate(wire_to_drawing({"units_written": "none written",
+                                  "panels": [wpanel(n("0.1", 0.1), n("7", 7))]}))
+    p = d.panels[0]
+    assert (p.width_mm.value, p.height_mm.value) == (0.1, 7)
     assert any("too small for glass" in f for f in d.flags)
+
+
+def test_no_unit_fraction_feet_dev1():
+    # dev1: '7' under the bottom edge, '10 4/6' down the side, no unit - feet.
+    # The exact fraction is used, not the model's rounded 10.67.
+    d = validate(wire_to_drawing({"units_written": "none written",
+                                  "panels": [wpanel(n("7", 7), n("10 4/6", 10.67))]}))
+    p = d.panels[0]
+    assert (p.width_mm.value, p.height_mm.value) == (2133.6, 3251.2)
+    assert not p.width_mm.clear and not p.height_mm.clear
+    assert any("read as feet" in f for f in d.flags)
 
 
 def test_no_unit_normal_cm_door_still_converted():

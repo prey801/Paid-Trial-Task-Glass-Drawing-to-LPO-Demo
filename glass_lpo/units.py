@@ -42,6 +42,19 @@ MIN_PLAUSIBLE_MAX_MM = 300.0
 _NUM = re.compile(r"\d+(?:\.\d+)?")
 
 
+def only_feet_plausible(sizes: list[float]) -> bool:
+    """No unit written and cm is ruled out: is feet the only believable unit?
+    True when every size as feet is a real glass size (50-6000 mm) and, as
+    inches, even the largest would be under MIN_PLAUSIBLE_MAX_MM - e.g. "7" x
+    "10 4/6" is 2134 x 3251 mm in feet but a 178 x 271 mm scrap in inches."""
+    return bool(sizes) and all(MIN_DIM_MM <= v * UNIT_TO_MM["ft"] <= MAX_DIM_MM for v in sizes) \
+        and max(sizes) * UNIT_TO_MM["inch"] < MIN_PLAUSIBLE_MAX_MM
+
+
+FEET_ASSUMED = ("no unit written - cm and inches would give sizes too small for glass, "
+                "so read as feet and converted to mm (x304.8) - confirm the unit (CHECK)")
+
+
 # ---------------------------------------------------------------------------
 # Reading a length (number + unit) from the text exactly as written
 # ---------------------------------------------------------------------------
@@ -149,6 +162,16 @@ def convert_to_mm(d: Drawing) -> None:
     if unit == "none":
         sizes = [f.value for f in (d.overall_width_mm, d.overall_height_mm) if f.value is not None]
         sizes += [f.value for p in d.panels for f in (p.width_mm, p.height_mm) if f.value is not None]
+        if sizes and max(sizes) * k < MIN_PLAUSIBLE_MAX_MM and only_feet_plausible(sizes):
+            fields = [d.overall_width_mm, d.overall_height_mm] + [
+                x for p in d.panels for x in (p.width_mm, p.height_mm)]
+            for f in fields:
+                if f.value is not None:
+                    _scale(f, UNIT_TO_MM["ft"])
+                    f.clear = False
+            d.units_written = "mm"
+            d.units_converted_from = FEET_ASSUMED
+            return
         if sizes and max(sizes) * k < MIN_PLAUSIBLE_MAX_MM:
             _unit_doubtful(d, f"no unit written, and read as cm the largest size would be "
                               f"{max(sizes) * k:g} mm - too small for glass; the unit may be "
