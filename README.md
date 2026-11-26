@@ -38,7 +38,7 @@ Check the install. The tests run offline and need no API key:
 .venv/bin/glass-lpo run samples/originals/real_16_door_and_window.jpg \
     --truth samples/ground_truth/real_16_door_and_window.json
 # score a whole set, 3 runs each
-.venv/bin/python scripts/evaluate_set.py samples/dev/originals samples/dev/ground_truth --runs 3
+.venv/bin/python scripts/evaluate_set.py samples/originals samples/ground_truth --runs 3
 ```
 
 **Web page** (upload a photo, see the before/after images, panels and flags, then download the Excel and PDF):
@@ -132,13 +132,11 @@ Any panel below High has **Needs check = Y**.
 
 **Accuracy (48 fields):** 34 correct (71%), 4 CHECK, 5 missing, 5 wrong. No size or dimension was stated wrong with confidence; the 5 wrong fields are glass-type wording, a quantity split and a misread cut-out (details in `samples/RESULTS.md`). The first run, before the unit fixes, scored 56% with 11 wrong; it is kept in `samples/outputs/run1_before_fix/`.
 
-**Dev set** (`samples/dev/`): four more hand drawings, ground truth committed before any run, used to check changes on drawings the system was not tuned on.
-
 **Synthetic set** (`samples/synthetic/`): three computer-generated drawings made by `scripts/make_synthetic.py`, with exact ground truth, used as a repeatable regression set.
 
 ## Known limitations
 
-- **Real photos:** tested on eight handwritten phone photos (four client drawings, four dev drawings) plus the synthetic set. More fabricator handwriting will throw up cases these didn't cover.
+- **Real photos:** tested on the four handwritten client photos plus the synthetic set. More fabricator handwriting will throw up cases these didn't cover.
 - **Self-reported confidence:** the model's own "clear" label is not fully reliable. On a distorted synthetic drawing it once read "150" as "160" with confidence. Sending both images and asking for alternative readings fixed that case, but a confidently wrong reading is still possible. Hence the human check before cutting.
 - **Rectangles only:** panels are assumed to be rectangles. Rakes, arches and L-shapes appear only as notes or features, and their area is the bounding rectangle.
 - **One assembly per photo:** each photo is treated as one drawing with one overall size. Several separate drawings on one page will raise "sizes don't add up" flags.

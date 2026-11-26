@@ -1,6 +1,6 @@
 """Score a whole set of drawings against their ground truth, N runs each.
 
-    .venv/bin/python scripts/evaluate_set.py samples/dev/originals samples/dev/ground_truth --runs 3
+    .venv/bin/python scripts/evaluate_set.py samples/originals samples/ground_truth --runs 3
     .venv/bin/python scripts/evaluate_set.py ... --second-read --out outputs/eval
 
 Each photo `<name>.jpg|.jpeg|.png` is matched with `<truth_dir>/<name>.json`.
