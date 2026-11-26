@@ -33,9 +33,12 @@ Check the install. The tests run offline and need no API key:
 **Command line**
 
 ```bash
-.venv/bin/glass-lpo run samples/originals/hard.jpg
+.venv/bin/glass-lpo run samples/originals/real_16_door_and_window.jpg
 # optional: score against a ground-truth file
-.venv/bin/glass-lpo run samples/originals/hard.jpg --truth samples/ground_truth/hard.json
+.venv/bin/glass-lpo run samples/originals/real_16_door_and_window.jpg \
+    --truth samples/ground_truth/real_16_door_and_window.json
+# score a whole set, 3 runs each
+.venv/bin/python scripts/evaluate_set.py samples/dev/originals samples/dev/ground_truth --runs 3
 ```
 
 **Web page** (upload a photo, see the before/after images, panels and flags, then download the Excel and PDF):
@@ -118,23 +121,28 @@ Any panel below High has **Needs check = Y**.
 
 ## Test drawings and results
 
-| Drawing | Photo | Enhanced | Ground truth | Outputs |
-|---|---|---|---|---|
-| Simple: one panel, two holes | `samples/originals/simple.jpg` | `samples/enhanced/simple.png` | `samples/ground_truth/simple.json` | `samples/outputs/simple.*` |
-| Realistic: door, 5–6 panels, notch, 25 mm holes | `samples/originals/realistic.jpg` | … | … | … |
-| Hard: messy, at an angle, poor light | `samples/originals/hard.jpg` | … | … | … |
+**Real client drawings** (handwritten, phone photos). Full results: [`samples/RESULTS.md`](samples/RESULTS.md). Ground truth was committed before any run (commit `9b13916`).
 
-<!-- TODO: fill in accuracy once the real phone photos are run -->
+| # | Drawing | Photo | Enhanced | Ground truth | LPO |
+|---|---|---|---|---|---|
+| 1 | Door frame + sliding window, m and cm | [jpg](samples/originals/real_16_door_and_window.jpg) | [png](samples/enhanced/real_16_door_and_window.png) | [json](samples/ground_truth/real_16_door_and_window.json) | [xlsx](samples/outputs/real_16_door_and_window/LPO-20261125-013.xlsx) / [pdf](samples/outputs/real_16_door_and_window/LPO-20261125-013.pdf) |
+| 2 | 2 windows + 1 door, feet | [jpg](samples/originals/real_17_windows_and_door.jpg) | [png](samples/enhanced/real_17_windows_and_door.png) | [json](samples/ground_truth/real_17_windows_and_door.json) | [xlsx](samples/outputs/real_17_windows_and_door/LPO-20261125-014.xlsx) / [pdf](samples/outputs/real_17_windows_and_door/LPO-20261125-014.pdf) |
+| 3 | Oak double door, 14 mm units, mm | [jpg](samples/originals/real_18_oak_double_door.jpg) | [png](samples/enhanced/real_18_oak_double_door.png) | [json](samples/ground_truth/real_18_oak_double_door.json) | [xlsx](samples/outputs/real_18_oak_double_door/LPO-20261125-015.xlsx) / [pdf](samples/outputs/real_18_oak_double_door/LPO-20261125-015.pdf) |
+| 4 | Three-panel screen, inches with fractions | [jpg](samples/originals/real_sd42_three_panel.jpg) | [png](samples/enhanced/real_sd42_three_panel.png) | [json](samples/ground_truth/real_sd42_three_panel.json) | [xlsx](samples/outputs/real_sd42_three_panel/LPO-20261125-016.xlsx) / [pdf](samples/outputs/real_sd42_three_panel/LPO-20261125-016.pdf) |
 
-`samples/synthetic/` also contains three computer-generated drawings, made by `scripts/make_synthetic.py`, with exact ground truth. They are used as a repeatable regression set.
+**Accuracy (48 fields):** 34 correct (71%), 4 CHECK, 5 missing, 5 wrong. No size or dimension was stated wrong with confidence; the 5 wrong fields are glass-type wording, a quantity split and a misread cut-out (details in `samples/RESULTS.md`). The first run, before the unit fixes, scored 56% with 11 wrong; it is kept in `samples/outputs/run1_before_fix/`.
+
+**Dev set** (`samples/dev/`): four more hand drawings, ground truth committed before any run, used to check changes on drawings the system was not tuned on.
+
+**Synthetic set** (`samples/synthetic/`): three computer-generated drawings made by `scripts/make_synthetic.py`, with exact ground truth, used as a repeatable regression set.
 
 ## Known limitations
 
-- **Real photos:** tested on synthetic drawings and a handful of phone photos only. Real fabricator handwriting will throw up cases these didn't cover.
+- **Real photos:** tested on eight handwritten phone photos (four client drawings, four dev drawings) plus the synthetic set. More fabricator handwriting will throw up cases these didn't cover.
 - **Self-reported confidence:** the model's own "clear" label is not fully reliable. On a distorted synthetic drawing it once read "150" as "160" with confidence. Sending both images and asking for alternative readings fixed that case, but a confidently wrong reading is still possible. Hence the human check before cutting.
 - **Rectangles only:** panels are assumed to be rectangles. Rakes, arches and L-shapes appear only as notes or features, and their area is the bounding rectangle.
 - **One assembly per photo:** each photo is treated as one drawing with one overall size. Several separate drawings on one page will raise "sizes don't add up" flags.
-- **Unit guess:** a drawing with no unit is assumed to be cm, with a size-based safety rule for mm. A small drawing in mm could still be read as cm (e.g. a 400 × 300 mirror would become 4000 × 3000 mm). It is always flagged, but confirm the unit on every unlabelled drawing.
+- **Unit guess:** a drawing with no unit is assumed to be cm, with size-based safety rules: kept as mm if cm would exceed the 6 m sheet limit, and read as feet if cm and inches would both be too small for glass (feet sizes stay CHECK). A small drawing in mm could still be read as cm (e.g. a 400 × 300 mirror would become 4000 × 3000 mm). It is always flagged, but confirm the unit on every unlabelled drawing.
 - **No pricing:** pricing is out of scope.
 - **Single user:** the LPO counter is a local file and is not safe for several people running the system at once.
 - **Free-tier variability:** the newest Flash models are often busy or rate-limited on the free tier, so the fallback list matters.
