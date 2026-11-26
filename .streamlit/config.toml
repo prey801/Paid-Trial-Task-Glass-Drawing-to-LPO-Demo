@@ -1,0 +1,18 @@
+# Colours per theme. Setting [theme.light] / [theme.dark] (not base=) keeps
+# Streamlit's light / dark / system switcher working.
+[theme.light]
+primaryColor = "#4F5BFF"
+backgroundColor = "#F6F5F1"          # soft warm white instead of pure #FFF
+secondaryBackgroundColor = "#ECEAE4"
+textColor = "#22252B"
+
+[theme.dark]
+primaryColor = "#4F5BFF"
+
+[server]
+# Local only - nothing on your network can reach the demo.
+address = "localhost"
+headless = true
+
+[browser]
+gatherUsageStats = false
