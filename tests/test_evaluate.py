@@ -50,8 +50,9 @@ def test_unclear_hole_diameters_are_flagged_not_right_or_wrong(tmp_path):
     holes = [Hole(diameter_mm=F(25.0)), Hole(diameter_mm=F(30.0, clear=False)),
              Hole(diameter_mm=Field(shown=True))]
     s = score(Drawing(panels=[gpanel(holes=holes)]), t)
-    assert s.flagged == 2 and s.wrong_confident == 0
-    assert s.correct == 2 + 1 + 1 + 1  # w, h, hole count, notch count + one clear dia
+    # 2 unclear diameters + the count (a hole with no diameter may not be a hole)
+    assert s.flagged == 3 and s.wrong_confident == 0
+    assert s.correct == 2 + 1 + 1  # w, h, notch count + one clear dia
     holes[0] = Hole(diameter_mm=F(12.0))
     assert score(Drawing(panels=[gpanel(holes=holes)]), t).wrong_confident == 1
 
@@ -163,3 +164,11 @@ def test_by_pieces_does_not_merge_different_panels(tmp_path):
     t = truth_file(tmp_path, [tpanel("P1", w=900), tpanel("P2", w=800)])
     got = Drawing(panels=[gpanel("P1", w=900), gpanel("P2", w=800)])
     assert score(got, t, by_pieces=True).correct == score(got, t).correct
+
+
+def test_hole_without_diameter_makes_count_check_not_wrong(tmp_path):
+    # real_sd42: fitting marks read as holes with no diameter - count is CHECK
+    t = truth_file(tmp_path, [tpanel(hole_count=0)])
+    s = score(Drawing(panels=[gpanel(holes=[Hole(diameter_mm=Field(shown=False))])]), t)
+    assert s.wrong_confident == 0
+    assert any("hole count: got 1 (wrong)" in x for x in s.details)

@@ -138,7 +138,7 @@ def panel_row(lpo: LPO, line: int, p: Panel) -> list[Any]:
         "Thickness (mm)": num_value(p.thickness_mm),
         "Glass type": text_value(p.glass_type),
         "Area (m²)": area_value(p),
-        "Hole count": len(p.holes),
+        "Hole count": f"{len(p.holes)} (CHECK)" if p.hole_count_uncertain else len(p.holes),
         "Hole diameters (mm)": hole_diameters(p),
         "Hole positions": hole_positions(p),
         "Notches/offcuts": features_text(p.notches_offcuts),

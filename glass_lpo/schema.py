@@ -95,6 +95,13 @@ class Panel(BaseModel):
                 or self.width_mm.value is None or self.height_mm.value is None or qty_bad)
 
     @property
+    def hole_count_uncertain(self) -> bool:
+        """A 'hole' with no diameter at all may be a fitting mark or symbol, not
+        a drilled hole - the count needs a human (a written-but-unclear
+        diameter is still a hole, so it doesn't count here)."""
+        return any(h.diameter_mm.value is None for h in self.holes)
+
+    @property
     def area_m2(self) -> Optional[float]:
         """Area for ALL pieces on this line (width x height x qty), m^2."""
         w, h, q = self.width_mm.value, self.height_mm.value, self.quantity.value or 1

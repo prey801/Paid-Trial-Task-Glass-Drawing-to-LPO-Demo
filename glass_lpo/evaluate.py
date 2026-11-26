@@ -275,7 +275,13 @@ def score(drawing: Drawing, truth_path: Path | str, *, by_pieces: bool = False) 
             _check(s, f"{pid} qty", p.quantity, tq, eq=lambda a, b: a == b)
         _check(s, f"{pid} thickness", p.thickness_mm, tp.get("thickness_mm"))
         _check(s, f"{pid} glass type", p.glass_type, tp.get("glass_type"), eq=_glass_eq)
-        _simple(s, f"{pid} hole count", len(p.holes), tp.get("hole_count", 0))
+        if p.hole_count_uncertain:  # shown as CHECK on the LPO
+            s.flagged += 1
+            ok = "right" if len(p.holes) == tp.get("hole_count", 0) else "wrong"
+            s.details.append(f"CHECK   {pid} hole count: got {len(p.holes)} ({ok}), "
+                             f"expected {tp.get('hole_count', 0)}")
+        else:
+            _simple(s, f"{pid} hole count", len(p.holes), tp.get("hole_count", 0))
         want_d = tp.get("hole_diameters_mm", [])
         if want_d or p.holes:
             _score_diameters(s, pid, p, want_d)

@@ -217,10 +217,19 @@ def test_no_unit_normal_cm_door_still_converted():
     assert (p.width_mm.value, p.height_mm.value) == (900, 2100) and p.width_mm.clear
 
 
-def test_no_unit_with_fraction_is_check():
+def test_no_unit_with_fraction_feet_or_inches_both_possible_is_check():
+    # 12 1/2 x 15: as feet 3810 x 4572, as inches 318 x 381 - both believable.
     d = validate(wire_to_drawing({"units_written": "none written",
-                                  "overall_height_mm": n("10 1/2", 10.5),
-                                  "panels": [wpanel(n("20", 20), n("40", 40))]}))
-    assert d.overall_height_mm.value == 10.5 and not d.overall_height_mm.clear
-    assert not d.panels[0].width_mm.clear
+                                  "panels": [wpanel(n("12 1/2", 12.5), n("15", 15))]}))
+    p = d.panels[0]
+    assert (p.width_mm.value, p.height_mm.value) == (12.5, 15) and not p.width_mm.clear
     assert any("fractions mean feet or inches" in f for f in d.flags)
+
+
+def test_no_unit_fraction_only_inches_believable_sd42():
+    # real_sd42: '107 7/8' overall, no unit: as feet 32.9 m - only inches fits.
+    d = validate(wire_to_drawing({"units_written": "none written",
+                                  "overall_width_mm": n("107 7/8", 107.875),
+                                  "panels": [wpanel(n("", None, "not_shown"), n("", None, "not_shown"))]}))
+    assert d.overall_width_mm.value == 2740 and not d.overall_width_mm.clear
+    assert any("read as inches" in f for f in d.flags)
