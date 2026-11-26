@@ -368,3 +368,39 @@ def test_written_width_never_overridden():
     d.panels[0].width_mm = F(1700, clear=False)
     out = validate(d)
     assert out.panels[0].width_mm.value == 1700 and not out.panels[0].width_mm.clear
+
+
+def _windows_and_door(door_w):
+    # real_17: 2 window sashes 2 ft wide (height = overall 4 ft, not written per
+    # sash) beside a separate door. The overall size is the window's only.
+    d = Drawing(
+        overall_width_mm=F(1219.2), overall_height_mm=F(1219.2),
+        panels=[panel("P1", 609.6, None), panel("P2", 609.6, None), panel("P3", door_w, 2133.6)],
+    )
+    for p in d.panels[:2]:
+        p.height_mm = Field(**NOT_WRITTEN)
+    return d
+
+
+def test_second_item_on_sheet_does_not_block_fill():
+    out = validate(_windows_and_door(1066.8))
+    for p in out.panels[:2]:
+        assert p.height_mm.value == 1219.2 and not p.height_mm.clear   # filled, CHECK
+        assert p.flags[0] == "height 1219.2 taken from overall height (not written)"
+    assert out.panels[2].height_mm.value == 2133.6                     # door untouched
+
+
+def test_second_item_fill_needs_the_sub_chain_to_add_up():
+    d = _windows_and_door(1066.8)
+    d.panels[1].width_mm = F(900)          # 609.6 + 900 is not the overall 1219.2
+    out = validate(d)
+    assert all(p.height_mm.value is None for p in out.panels[:2])
+
+
+def test_second_item_with_nothing_written_is_left_out():
+    d = _windows_and_door(None)
+    d.panels[2].width_mm = Field(**NOT_WRITTEN)
+    d.panels[2].height_mm = Field(**NOT_WRITTEN)   # door glass: no size written at all
+    out = validate(d)
+    assert [p.height_mm.value for p in out.panels] == [1219.2, 1219.2, None]
+    assert out.panels[2].width_mm.value is None

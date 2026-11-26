@@ -177,6 +177,10 @@ GLASS DRAWING CONVENTIONS
 - Words written inside an area that name what fills it ("glass", "alumin",
   "panel", "wood") tell you whether the area is glass. Only glass areas are
   panels. The word "glass" alone is not a glass_type.
+- When an item is divided into areas (e.g. a door with glass at the top and
+  aluminium at the bottom), the item's outer dimensions are NOT the glass
+  size. Unless a dimension line is drawn for the glass area itself, its
+  width/height are null with source "overall_dimension" (or "not_shown").
 - "Ø", "dia", "D" before/after a number means a hole DIAMETER.
 - A thickness like "12mm", "10mm", "6mm" written next to glass words is the
   GLASS THICKNESS, not a panel dimension.

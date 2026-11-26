@@ -361,17 +361,25 @@ def _fill_from_overall(d: Drawing) -> dict[int, tuple[str, str]]:
 
     def try_fill(span_attr: str, chain_attr: str, overall_span: float, overall_chain: float,
                  name: str) -> bool:
-        chain = [getattr(p, chain_attr).value for p in ps]
-        if any(v is None for v in chain) or not _close(sum(chain), overall_chain):
-            return False
         spans = [getattr(p, span_attr) for p in ps]
         # A not-written value (or one we derived on an earlier run - validate is
         # idempotent) is a fill target; any written value must match the overall.
         derived = [not f.shown and not f.clear for f in spans]
-        if any(f.value is not None and not der and not _close(f.value, overall_span)
-               for f, der in zip(spans, derived)):
-            return False
-        targets = [i for i, der in enumerate(derived) if der]
+        chain = [getattr(p, chain_attr).value for p in ps]
+        if all(v is not None for v in chain) and _close(sum(chain), overall_chain):
+            if any(f.value is not None and not der and not _close(f.value, overall_span)
+                   for f, der in zip(spans, derived)):
+                return False
+            targets = [i for i, der in enumerate(derived) if der]
+        else:
+            # Several items on one sheet (e.g. 2 windows + a door): the overall
+            # size belongs to ONE item. Fill only the panels with the span not
+            # written, and only if THEIR chain alone adds up to the overall.
+            # A panel whose chain value is unknown (e.g. the door's glass, with
+            # no size written) can't be shown to belong, so it is left out.
+            targets = [i for i, der in enumerate(derived) if der and chain[i] is not None]
+            if not targets or not _close(sum(chain[i] for i in targets), overall_chain):
+                return False
         if not targets:
             return False
         for i in targets:
